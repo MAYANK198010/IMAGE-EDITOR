@@ -45,7 +45,7 @@ A browser-based workspace for image editing and short-form video editing.
 npm install
 npm run dev
 npm run build
-npm run lint
+npm run typecheck
 ```
 
 ## Reference documentation
