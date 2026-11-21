@@ -585,7 +585,6 @@ export default function VideoStudio({ onStatus }: Props) {
       metadataProbe.removeAttribute("src");
       metadataProbe.load();
 
-      const media = await import("mediabunny");
       const videoCodec = await media.getFirstEncodableVideoCodec(outputFormat.getSupportedVideoCodecs(), {
         width: dimensions.width,
         height: dimensions.height,
