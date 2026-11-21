@@ -6,6 +6,7 @@ Research snapshot: **21 November 2026**. This is a practical benchmark of public
 
 | Product | Image capabilities documented | Video / short-form capabilities documented | Useful product lesson |
 |---|---|---|---|
+| **Adobe Photoshop** | Deep layer-based image editing; masks and selections; non-destructive adjustment layers; retouching, crop/expand, background removal, upscaling and generative fill; current releases add Relight, Quick Compare, Generative Restyle and improved contextual object removal. | Not the primary short-form video benchmark for this product. | Treat layers, masks and adjustment layers as the professional image-editing foundation; make AI edits targeted and revisable rather than flattening every change. |
 | **Photopea** | Layer-based raster/vector editing; PSD support; layers, masks, layer styles, smart objects, adjustment layers, channels, paths; brightness, saturation, levels, curves, blur, liquify and puppet warp. | Includes a video-editing learning section, but it is best used here as the image-editing depth benchmark. | A serious image editor needs editable layers and non-destructive adjustments, not only one flattened canvas. |
 | **Adobe Express** | Preset filters; brightness, contrast, saturation, warmth, sharpening and blur; background removal; crop/shape, rotate, scale, nudge, flip, resize presets, text, frames and templates. | Quick social content workflows and media assets are integrated with its design tools. | Make common social and product-photo tasks fast with presets, good defaults and simple resize/crop. |
 | **CapCut** | Photo effects and overlays are part of its creator workflow; transform, masks, blend modes and color adjustments are also used across visual layers. | Trim, split, merge, speed changes and speed curves; multi-track timeline; transitions; filters and video/body effects; keyframes; masks; transform; blend modes; HSL/curves; chroma key; stabilization; optical-flow slow motion; auto captions; text-to-speech; background removal; motion tracking; voice effects; export controls for resolution, frame rate, codec and bitrate. | Short-form video editors compete on motion, captions, effects, speed curves, audio tools and fast export—not only cutting clips. |
@@ -15,6 +16,8 @@ Research snapshot: **21 November 2026**. This is a practical benchmark of public
 ### Source links
 
 - [Photopea: product overview and supported editing capabilities](https://www.photopea.com/)
+- [Adobe Photoshop: current desktop release notes](https://helpx.adobe.com/photoshop/desktop/whats-new/whats-new-in-adobe-photoshop-on-desktop.html)
+- [Adobe Photoshop: AI Assisted Editor tools](https://helpx.adobe.com/photoshop/desktop/generative-ai/use-ai-assisted-mode.html)
 - [Adobe Photoshop: product and AI-powered editing features](https://www.adobe.com/products/photoshop.html)
 - [Adobe Express: online photo editor](https://www.adobe.com/express/feature/image/editor)
 - [CapCut: video editing tools](https://www.capcut.com/tools/video)
@@ -131,6 +134,7 @@ Use a timeline data model independent of the preview:
 ### Media pipeline recommendation
 
 - The browser's WebCodecs API exposes low-level video/audio decode and encode primitives, but does **not** demux input containers or mux a finished MP4/WebM file by itself. A demuxer/muxer is also required.
+- The simpler MediaRecorder API is widely available, but codec/MIME support varies. The source-element `captureStream()` route used by the current prototype is not Baseline and has limited browser availability; it must remain feature-detected and must not be presented as universal export support.
 - **Mediabunny is the preferred first library to evaluate** for this project's browser-first export pipeline: it documents reading, writing and converting MP4/WebM and other containers, multiple tracks, and WebCodecs-based encoding/decoding.
 - Keep **FFmpeg.wasm as an optional fallback**, not the default path. It runs inside workers, but its own published benchmark shows browser WASM transcoding can be much slower than native FFmpeg and it has meaningful CPU/memory cost.
 - Feature-detect codec support and offer compatible export presets rather than assuming all browsers can encode the same formats.
