@@ -169,42 +169,53 @@ function drawShapeLayer(context: CanvasRenderingContext2D, layer: Extract<Editab
 }
 
 function drawFrameLayer(context: CanvasRenderingContext2D, layer: Extract<EditableLayer, { type: "frame" }>, width: number, height: number) {
-  const inset = Math.max(4, layer.thickness * width * 0.006);
-  const line = Math.max(2, inset * 0.12);
+  const x = layer.x * width;
+  const y = layer.y * height;
+  const w = layer.width * width;
+  const h = layer.height * height;
+  const inset = Math.max(3, layer.thickness * width * 0.006);
+  const line = Math.max(2, inset * 0.14);
+
   context.save();
+  context.translate(x + w / 2, y + h / 2);
+  context.rotate((layer.rotation * Math.PI) / 180);
+  const left = -w / 2;
+  const top = -h / 2;
+
   if (layer.style === "polaroid") {
+    // Draw only the border bands. Clearing the middle with destination-out
+    // would erase the photograph underneath the frame.
     context.fillStyle = layer.color;
-    context.fillRect(0, 0, width, height);
-    context.globalCompositeOperation = "destination-out";
-    context.fillRect(inset, inset, width - inset * 2, height - inset * 2 - inset * 0.9);
-    context.globalCompositeOperation = "source-over";
+    context.fillRect(left, top, w, inset);
+    context.fillRect(left, top, inset, h);
+    context.fillRect(left + w - inset, top, inset, h);
+    context.fillRect(left, top + h - inset * 2.3, w, inset * 2.3);
   } else if (layer.style === "film") {
     context.fillStyle = layer.color;
-    context.fillRect(0, 0, width, height);
-    context.globalCompositeOperation = "destination-out";
-    context.fillRect(inset * 1.5, inset, width - inset * 3, height - inset * 2);
-    context.globalCompositeOperation = "source-over";
+    context.fillRect(left, top, w, inset * 1.7);
+    context.fillRect(left, top + h - inset * 1.7, w, inset * 1.7);
     context.fillStyle = layer.secondaryColor;
-    const perforation = Math.max(5, inset * 0.5);
-    const holeSize = Math.max(2, inset * 0.18);
-    for (let x = inset * 0.45; x < width - inset * 0.4; x += perforation) {
-      context.fillRect(x, inset * 0.35, holeSize, holeSize);
-      context.fillRect(x, height - inset * 0.35 - holeSize, holeSize, holeSize);
+    const perforation = Math.max(6, inset * 0.72);
+    const holeWidth = Math.max(3, inset * 0.42);
+    const holeHeight = Math.max(2, inset * 0.62);
+    for (let px = left + inset * 0.3; px < left + w - inset * 0.2; px += perforation) {
+      context.fillRect(px, top + inset * 0.48, holeWidth, holeHeight);
+      context.fillRect(px, top + h - inset * 1.1, holeWidth, holeHeight);
     }
   } else if (layer.style === "neon") {
     context.shadowColor = layer.color;
-    context.shadowBlur = inset * 1.4;
+    context.shadowBlur = inset * 1.5;
     context.strokeStyle = layer.color;
     context.lineWidth = line * 2;
-    context.strokeRect(inset * 1.5, inset * 1.5, width - inset * 3, height - inset * 3);
+    context.strokeRect(left + inset, top + inset, w - inset * 2, h - inset * 2);
   } else {
     context.strokeStyle = layer.color;
     context.lineWidth = inset;
-    context.strokeRect(inset / 2, inset / 2, width - inset, height - inset);
+    context.strokeRect(left + inset / 2, top + inset / 2, w - inset, h - inset);
     if (layer.style === "double") {
       context.strokeStyle = layer.secondaryColor;
       context.lineWidth = line;
-      context.strokeRect(inset * 1.7, inset * 1.7, width - inset * 3.4, height - inset * 3.4);
+      context.strokeRect(left + inset * 1.8, top + inset * 1.8, w - inset * 3.6, h - inset * 3.6);
     }
   }
   context.restore();
@@ -244,9 +255,24 @@ export function hitTestLayer(layers: EditableLayer[], x: number, y: number, widt
     const dy = y - cy;
     const localX = dx * Math.cos(angle) - dy * Math.sin(angle) + cx;
     const localY = dx * Math.sin(angle) + dy * Math.cos(angle) + cy;
-    if (localX >= bounds.x && localX <= bounds.x + bounds.width && localY >= bounds.y && localY <= bounds.y + bounds.height) {
-      return layer.id;
+    const inside = localX >= bounds.x && localX <= bounds.x + bounds.width &&
+      localY >= bounds.y && localY <= bounds.y + bounds.height;
+    if (!inside) continue;
+
+    if (layer.type === "frame") {
+      // A frame's transparent centre must not intercept clicks intended for
+      // layers underneath it. Only the visible border bands are selectable.
+      const inset = Math.max(3, layer.thickness * width * 0.006);
+      const border = layer.style === "film" ? inset * 1.7 : layer.style === "polaroid" ? inset * 2.3 : inset * 2;
+      const nearEdge =
+        localX - bounds.x <= border ||
+        bounds.x + bounds.width - localX <= border ||
+        localY - bounds.y <= border ||
+        bounds.y + bounds.height - localY <= border;
+      if (nearEdge) return layer.id;
+      continue;
     }
+    return layer.id;
   }
   return null;
 }
