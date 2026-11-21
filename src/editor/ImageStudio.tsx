@@ -95,7 +95,7 @@ export default function ImageStudio({ onStatus }: Props) {
     try {
       renderImageDocument(canvas, image, doc, { selection: !showOriginal, previewOriginal: showOriginal });
     } catch (error) {
-      onStatus(error instanceof Error ? \`Preview error: \${error.message}\` : "Could not render the image preview.");
+      onStatus(error instanceof Error ? `Preview error: ${error.message}` : "Could not render the image preview.");
     }
   }, [image, doc, showOriginal, onStatus]);
 
@@ -144,7 +144,7 @@ export default function ImageStudio({ onStatus }: Props) {
       layers: [...current.layers, layer],
       selectedLayerId: layer.id,
     }));
-    onStatus(\`\${layer.name} added. Drag it on the canvas to position it.\`);
+    onStatus(`${layer.name} added. Drag it on the canvas to position it.`);
   };
 
   const addText = () => addLayer(createTextLayer("Your headline"));
@@ -218,7 +218,7 @@ export default function ImageStudio({ onStatus }: Props) {
       ...current,
       crop: { x: (1 - width) / 2, y: (1 - height) / 2, width, height },
     }));
-    onStatus(\`Crop ratio set to \${ratio}\`);
+    onStatus(`Crop ratio set to ${ratio}`);
   };
 
   const updateCrop = (key: keyof ImageEditDocument["crop"], value: number) => {
@@ -321,7 +321,7 @@ export default function ImageStudio({ onStatus }: Props) {
   };
 
   const duplicateLayer = (layer: EditableLayer) => {
-    const duplicate = { ...layer, id: makeId(), name: \`\${layer.name} copy\`, x: clamp(layer.x + 0.025, 0, 0.9), y: clamp(layer.y + 0.025, 0, 0.9) } as EditableLayer;
+    const duplicate = { ...layer, id: makeId(), name: `${layer.name} copy`, x: clamp(layer.x + 0.025, 0, 0.9), y: clamp(layer.y + 0.025, 0, 0.9) } as EditableLayer;
     addLayer(duplicate);
   };
 
@@ -353,8 +353,8 @@ export default function ImageStudio({ onStatus }: Props) {
           return;
         }
         const extension = exportFormat === "image/jpeg" ? "jpg" : exportFormat === "image/webp" ? "webp" : "png";
-        downloadBlob(blob, \`\${imageName.replace(/\.[^.]+$/, "")}-\${exportSize}-edited.\${extension}\`);
-        onStatus(\`\${targetLongEdge}px \${extension.toUpperCase()} export ready\`);
+        downloadBlob(blob, `${imageName.replace(/\.[^.]+$/, "")}-${exportSize}-edited.${extension}`);
+        onStatus(`${targetLongEdge}px ${extension.toUpperCase()} export ready`);
       }, exportFormat, exportFormat === "image/png" ? undefined : quality / 100);
     } catch {
       onStatus("The browser could not allocate this export size. Reduce the resolution and retry.");
@@ -394,7 +394,7 @@ export default function ImageStudio({ onStatus }: Props) {
           onDragLeave={() => setDragging(false)}
           onDrop={(event) => { event.preventDefault(); setDragging(false); loadBaseImage(event.dataTransfer.files[0]); }}>
           {image ? (
-            <div className="studio-canvas-wrap" style={{ transform: \`scale(\${zoom})\` }}>
+            <div className="studio-canvas-wrap" style={{ transform: `scale(${zoom})` }}>
               <canvas
                 ref={canvasRef}
                 className="editor-canvas"
@@ -415,7 +415,7 @@ export default function ImageStudio({ onStatus }: Props) {
             </div>
           )}
           <div className="studio-canvas-footer">
-            <span>{image ? \`\${canvasRef.current?.width ?? image.naturalWidth} × \${canvasRef.current?.height ?? image.naturalHeight} px\` : "No image loaded"}</span>
+            <span>{image ? `${canvasRef.current?.width ?? image.naturalWidth} × ${canvasRef.current?.height ?? image.naturalHeight} px` : "No image loaded"}</span>
             <span>{doc.layers.length} editable layer{doc.layers.length === 1 ? "" : "s"}</span>
           </div>
         </div>
@@ -424,7 +424,7 @@ export default function ImageStudio({ onStatus }: Props) {
           <div className="filter-preset-row">
             {FILTER_PRESETS.map((preset) => (
               <button key={preset.name} onClick={() => applyPreset(preset.values)} disabled={!image}>
-                <span className={\`filter-tile filter-\${preset.name.toLowerCase()}\`}>{imageUrl && <img src={imageUrl} alt=""/>}</span>
+                <span className={`filter-tile filter-${preset.name.toLowerCase()}`}>{imageUrl && <img src={imageUrl} alt=""/>}</span>
                 <small>{preset.name}</small>
               </button>
             ))}
@@ -535,7 +535,7 @@ export default function ImageStudio({ onStatus }: Props) {
             ] as const).map(([label, key, min, max, unit]) => (
               <label className="range-control effect-slider" key={key}>
                 <span><b>{label}</b><output>{doc.adjustments[key]}{unit}</output></span>
-                <input type="range" min={min} max={max} value={doc.adjustments[key]} onPointerDown={() => pushHistory()} onChange={(event) => changeAdjustment(key, Number(event.target.value))} onPointerUp={() => onStatus(\`\${label} updated\`)} disabled={!image}/>
+                <input type="range" min={min} max={max} value={doc.adjustments[key]} onPointerDown={() => pushHistory()} onChange={(event) => changeAdjustment(key, Number(event.target.value))} onPointerUp={() => onStatus(`${label} updated`)} disabled={!image}/>
               </label>
             ))}
           </div>
