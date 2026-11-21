@@ -30,7 +30,7 @@ export const FILTER_PRESETS: Array<{ name: string; values: Partial<AdjustmentSta
 export function makeId() {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
-    : \`layer-\${Date.now()}-\${Math.random().toString(16).slice(2)}\`;
+    : `layer-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 export function clamp(value: number, min: number, max: number) {
@@ -46,14 +46,14 @@ export function rotatedDimensions(image: HTMLImageElement, degrees: number) {
 
 export function filterString(adjustments: AdjustmentState) {
   return [
-    \`brightness(\${adjustments.brightness}%)\`,
-    \`contrast(\${adjustments.contrast}%)\`,
-    \`saturate(\${adjustments.saturation}%)\`,
-    \`blur(\${adjustments.blur}px)\`,
-    \`grayscale(\${adjustments.grayscale}%)\`,
-    \`sepia(\${adjustments.sepia}%)\`,
-    \`hue-rotate(\${adjustments.hue}deg)\`,
-    \`invert(\${adjustments.invert}%)\`,
+    `brightness(${adjustments.brightness}%)`,
+    `contrast(${adjustments.contrast}%)`,
+    `saturate(${adjustments.saturation}%)`,
+    `blur(${adjustments.blur}px)`,
+    `grayscale(${adjustments.grayscale}%)`,
+    `sepia(${adjustments.sepia}%)`,
+    `hue-rotate(${adjustments.hue}deg)`,
+    `invert(${adjustments.invert}%)`,
   ].join(" ");
 }
 
@@ -85,7 +85,7 @@ function wrapText(context: CanvasRenderingContext2D, text: string, maxWidth: num
     }
     let line = words[0];
     for (const word of words.slice(1)) {
-      const candidate = \`\${line} \${word}\`;
+      const candidate = `${line} ${word}`;
       if (context.measureText(candidate).width <= maxWidth) line = candidate;
       else {
         lines.push(line);
@@ -106,7 +106,7 @@ function drawTextLayer(context: CanvasRenderingContext2D, layer: Extract<Editabl
   context.save();
   context.translate(x + boxWidth / 2, y + boxHeight / 2);
   context.rotate((layer.rotation * Math.PI) / 180);
-  context.font = \`\${layer.italic ? "italic " : ""}\${layer.fontWeight} \${fontSize}px \${layer.fontFamily}\`;
+  context.font = `${layer.italic ? "italic " : ""}${layer.fontWeight} ${fontSize}px ${layer.fontFamily}`;
   context.textAlign = layer.align;
   context.textBaseline = "middle";
   context.lineJoin = "round";
@@ -315,7 +315,7 @@ export function renderImageDocument(
       const radius = Math.max(width, height) * 0.72;
       const vignette = ctx.createRadialGradient(width / 2, height / 2, radius * 0.28, width / 2, height / 2, radius);
       vignette.addColorStop(0, "rgba(0,0,0,0)");
-      vignette.addColorStop(1, \`rgba(0,0,0,\${intensity * 0.78})\`);
+      vignette.addColorStop(1, `rgba(0,0,0,${intensity * 0.78})`);
       ctx.fillStyle = vignette;
       ctx.fillRect(0, 0, width, height);
     }
@@ -420,7 +420,7 @@ export function createShapeLayer(shape: "rectangle" | "ellipse" | "line" | "star
 
 export function createFrameLayer(style: "classic" | "polaroid" | "film" | "neon" | "double" = "classic"): EditableLayer {
   return {
-    ...defaultLayerBase(\`\${style[0].toUpperCase() + style.slice(1)} frame\`),
+    ...defaultLayerBase(`${style[0].toUpperCase() + style.slice(1)} frame`),
     type: "frame",
     style,
     color: style === "neon" ? "#b7a0ff" : "#f5f1e8",
