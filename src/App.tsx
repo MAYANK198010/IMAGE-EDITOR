@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { DragEvent } from "react";
 import {
   Aperture, ArrowDownToLine, AudioLines, Check, ChevronDown, CircleHelp,
   Crop, Eye, Film, FlipHorizontal, FlipVertical, FolderOpen, Image as ImageIcon,
@@ -188,7 +189,6 @@ export default function App() {
       setStatus("Please choose a supported image file.");
       return;
     }
-    if (imageUrl) URL.revokeObjectURL(imageUrl);
     setImageUrl(URL.createObjectURL(file));
     setImageName(file.name);
     setEdit(DEFAULT_EDIT);
@@ -406,7 +406,6 @@ export default function App() {
       setStatus("Please choose a supported video file.");
       return;
     }
-    if (videoUrl) URL.revokeObjectURL(videoUrl);
     setVideoUrl(URL.createObjectURL(file));
     setVideoName(file.name);
     setSpeed(1);
@@ -567,7 +566,7 @@ export default function App() {
   const canExportVideo = Boolean(videoUrl && videoDuration > 0);
   const originalSize = imageElement ? getRotatedSize(imageElement, edit.rotation) : { width: 0, height: 0 };
 
-  const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
+  const onDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setDragging(false);
     const file = event.dataTransfer.files[0];
@@ -858,9 +857,9 @@ export default function App() {
               <div className="panel-title"><div><Scissors size={16} /><strong>Trim clip</strong></div></div>
               <div className="trim-control">
                 <label><span>Start</span><output>{formatTime(trimStart)}</output></label>
-                <input type="range" min="0" max={Math.max(videoDuration, 0.1)} step="0.05" value={Math.min(trimStart, videoDuration)} onChange={(event) => { const value = Math.min(Number(event.target.value), trimEnd - 0.1); setTrimStart(Math.max(0, value)); if (playhead < value) seekVideo(value); }} disabled={!videoUrl} />
+                <input type="range" min="0" max={Math.max(videoDuration, 0.1)} step="0.05" value={Math.min(trimStart, videoDuration)} onChange={(event) => { const value = Math.min(Number(event.target.value), trimEnd - 0.1); setTrimStart(Math.max(0, value)); if (playhead < value) { setPlayhead(value); if (videoRef.current) videoRef.current.currentTime = value; } }} disabled={!videoUrl} />
                 <label><span>End</span><output>{formatTime(trimEnd)}</output></label>
-                <input type="range" min="0" max={Math.max(videoDuration, 0.1)} step="0.05" value={Math.min(trimEnd, videoDuration)} onChange={(event) => { const value = Math.max(trimStart + 0.1, Number(event.target.value)); setTrimEnd(value); if (playhead > value) seekVideo(value); }} disabled={!videoUrl} />
+                <input type="range" min="0" max={Math.max(videoDuration, 0.1)} step="0.05" value={Math.min(trimEnd, videoDuration)} onChange={(event) => { const value = Math.max(trimStart + 0.1, Number(event.target.value)); setTrimEnd(value); if (playhead > value) { setPlayhead(value); if (videoRef.current) videoRef.current.currentTime = value; } }} disabled={!videoUrl} />
                 <small>Export records only the selected range.</small>
               </div>
               <div className="panel-divider" />
