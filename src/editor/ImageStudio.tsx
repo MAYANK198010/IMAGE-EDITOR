@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { PointerEvent } from "react";
 import {
   ArrowDownToLine, ArrowDown, ArrowUp, Eye, EyeOff, FlipHorizontal, FlipVertical,
   Image as ImageIcon, Layers3, Lock, LockOpen, Plus, RotateCcw, Trash2, Type,
@@ -41,11 +42,6 @@ function downloadBlob(blob: Blob, filename: string) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
-function controlValue(layer: EditableLayer | undefined, key: string) {
-  if (!layer) return "";
-  return (layer as unknown as Record<string, string | number | boolean>)[key] ?? "";
-}
-
 export default function ImageStudio({ onStatus }: Props) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageName, setImageName] = useState("Untitled image");
@@ -60,7 +56,6 @@ export default function ImageStudio({ onStatus }: Props) {
   const [exportSize, setExportSize] = useState<"original" | "1080" | "2k" | "4k">("original");
   const [quality, setQuality] = useState(92);
   const [dragging, setDragging] = useState(false);
-  const [overlayFilePending, setOverlayFilePending] = useState(false);
 
   const baseInputRef = useRef<HTMLInputElement>(null);
   const overlayInputRef = useRef<HTMLInputElement>(null);
@@ -90,7 +85,7 @@ export default function ImageStudio({ onStatus }: Props) {
       if (!cancelled) onStatus("This image could not be decoded by the browser.");
     };
     element.src = imageUrl;
-    return () => { cancelled = true; element.onload = null; element.onerror = null; };
+    return () => { cancelled = true; element.onload = null; element.onerror = null; URL.revokeObjectURL(imageUrl); };
   }, [imageUrl, onStatus]);
 
   useEffect(() => {
@@ -168,12 +163,10 @@ export default function ImageStudio({ onStatus }: Props) {
     element.onload = () => {
       const layer = createImageLayer(element, url, file.name);
       addLayer(layer);
-      setOverlayFilePending(false);
     };
     element.onerror = () => {
       URL.revokeObjectURL(url);
       overlayUrls.current = overlayUrls.current.filter((entry) => entry !== url);
-      setOverlayFilePending(false);
       onStatus("The image layer could not be decoded.");
     };
     element.src = url;
@@ -248,7 +241,7 @@ export default function ImageStudio({ onStatus }: Props) {
     setDoc((current) => ({ ...current, adjustments: { ...current.adjustments, [key]: value } }));
   };
 
-  const onCanvasPointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
+  const onCanvasPointerDown = (event: PointerEvent<HTMLCanvasElement>) => {
     const canvas = event.currentTarget;
     if (!canvas.width || !canvas.height) return;
     const rect = canvas.getBoundingClientRect();
@@ -281,7 +274,7 @@ export default function ImageStudio({ onStatus }: Props) {
     canvas.setPointerCapture(event.pointerId);
   };
 
-  const onCanvasPointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
+  const onCanvasPointerMove = (event: PointerEvent<HTMLCanvasElement>) => {
     const drag = dragRef.current;
     const canvas = event.currentTarget;
     if (!drag || !canvas.width || !canvas.height) return;
@@ -311,7 +304,7 @@ export default function ImageStudio({ onStatus }: Props) {
     }));
   };
 
-  const onCanvasPointerUp = (event: React.PointerEvent<HTMLCanvasElement>) => {
+  const onCanvasPointerUp = (event: PointerEvent<HTMLCanvasElement>) => {
     dragRef.current = null;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   };
@@ -377,7 +370,7 @@ export default function ImageStudio({ onStatus }: Props) {
         <button onClick={addText} disabled={!image}><Type/><span>Text</span></button>
         <button onClick={() => addShape("rectangle")} disabled={!image}><Square/><span>Shape</span></button>
         <button onClick={() => addFrame("classic")} disabled={!image}><Frame/><span>Frame</span></button>
-        <button onClick={() => { setOverlayFilePending(true); overlayInputRef.current?.click(); }} disabled={!image}><ImageIcon/><span>Image layer</span></button>
+        <button onClick={() => overlayInputRef.current?.click()} disabled={!image}><ImageIcon/><span>Image layer</span></button>
       </aside>
 
       <section className="studio-main">
