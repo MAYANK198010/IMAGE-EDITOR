@@ -15,6 +15,10 @@ Research snapshot: **21 November 2026**. This is a practical benchmark of public
 ### Source links
 
 - [Photopea: product overview and supported editing capabilities](https://www.photopea.com/)
+- [Adobe Photoshop: product and AI-powered editing features](https://www.adobe.com/products/photoshop.html)
+- [Adobe Express: online photo editor](https://www.adobe.com/express/feature/image/editor)
+- [CapCut: video editing tools](https://www.capcut.com/tools/video)
+- [Microsoft Clipchamp: video editor features](https://clipchamp.com/en/video-editor/)
 - [Photopea: layers](https://www.photopea.com/learn/layers)
 - [Photopea: adjustments and filters](https://www.photopea.com/learn/adjustments-filters)
 - [Photopea: smart objects](https://www.photopea.com/learn/smart-objects)
@@ -76,24 +80,29 @@ These are feature categories to consider when planning a modern editor. They are
 
 | Capability | Current state |
 |---|---|
-| React/TypeScript application shell | Implemented |
-| Image import (PNG/JPEG/WebP/GIF first frame) | Implemented |
-| Image preview canvas | Implemented |
-| Brightness, contrast, saturation, blur, grayscale, sepia | Implemented |
-| Basic filter presets | Implemented |
-| Rotate and flip | Implemented |
-| One basic bottom-centred text overlay | Implemented |
-| PNG image export | Implemented |
-| One local video clip import and preview | Implemented |
+| React 19 / TypeScript / Vite application shell | Implemented |
+| Local image import and drag-and-drop | Implemented |
+| Image preview and flattened Canvas 2D rendering | Implemented |
+| Brightness, contrast, saturation, blur, grayscale, sepia, hue and invert | Implemented |
+| Eight filter presets | Implemented |
+| Crop aspect ratios: original, free, 1:1, 4:5, 16:9 and 9:16 | Implemented through controls |
+| Crop size and crop position | Implemented through sliders; no on-canvas crop handles |
+| Rotate and horizontal/vertical flip | Implemented |
+| Styled single text overlay (text, colour, size, vertical position) | Implemented; not a draggable multi-layer text system |
+| Press-and-hold original comparison | Implemented |
+| Image undo/redo | Implemented |
+| PNG and JPEG export with JPEG quality setting | Implemented |
+| Import and preview one local video clip | Implemented |
 | Video seek and playback | Implemented |
 | Start/end trim range | Implemented |
-| Playback speed and volume | Implemented |
-| Browser MediaRecorder WebM export of selected range | Implemented, browser-dependent |
-| Crop handles, image resize UI, layer stack, draggable/multiple text objects | Not implemented |
-| Multi-clip/multi-track timeline, transitions, keyframes, speed curves | Not implemented |
-| Captions, chroma key, stabilization, tracking, audio mixing | Not implemented |
-| MP4 export and full codec controls | Not implemented |
-| AI background removal/generative fill/object removal | Not implemented |
+| Playback speed and source volume | Implemented |
+| MediaRecorder export of selected range | Browser-dependent; WebM or MP4 only where capture and MIME support exist |
+| True image layers, masks, blend modes, object selections and retouch brushes | Not implemented |
+| Interactive crop handles, resize canvas, shape/sticker objects and multi-object selection | Not implemented |
+| Multi-clip/multi-track timeline, split/ripple editing, transitions and keyframes | Not implemented |
+| Captions, chroma key, stabilisation, motion tracking, audio mixing and speed curves | Not implemented |
+| Reliable MP4 pipeline with container muxing, codec/bitrate controls and export progress | Not implemented |
+| AI background removal, generative fill and object removal | Not implemented |
 
 ## 4. Recommended technical architecture
 
