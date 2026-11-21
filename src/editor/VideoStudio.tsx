@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  AudioLines, ArrowDownToLine, ArrowLeft, ArrowRight, Check, Clapperboard,
+  AudioLines, ArrowDownToLine, ArrowLeft, ArrowRight, Clapperboard,
   Copy, Film, Music2, Pause, Play, Plus, Scissors, Trash2, Type, Upload,
-  Volume2, VolumeX, WandSparkles, Video, X,
+  Volume2, Video, X,
 } from "lucide-react";
 
 type Props = { onStatus: (message: string) => void };
@@ -516,7 +516,10 @@ export default function VideoStudio({ onStatus }: Props) {
           });
           const writable = await handle.createWritable();
           const media = await import("mediabunny");
-          target = new media.StreamTarget(writable, { chunked: true });
+          // Mediabunny emits positioned write chunks; FileSystemWritableFileStream
+          // implements the same runtime command shape, but TS models it with a
+          // broader WritableStream type, so narrow it at this adapter boundary.
+          target = new media.StreamTarget(writable as unknown as WritableStream<media.StreamTargetChunk>, { chunked: true });
         } catch (error) {
           if (error instanceof DOMException && error.name === "AbortError") {
             onStatus("Export cancelled");
