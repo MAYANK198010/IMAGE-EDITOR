@@ -3,7 +3,7 @@ import type { PointerEvent } from "react";
 import {
   ArrowDownToLine, ArrowDown, ArrowUp, Eye, EyeOff, FlipHorizontal, FlipVertical,
   Image as ImageIcon, Layers3, Lock, LockOpen, Plus, RotateCcw, Trash2, Type,
-  Copy, Crop, Square, Frame, Undo2, Redo2, SlidersHorizontal, Sparkles,
+  Copy, Crop, Square, Frame, Undo2, Redo2,
   Maximize2, ZoomIn, ZoomOut, Upload, WandSparkles,
 } from "lucide-react";
 import type { AdjustmentState, EditableLayer, ImageEditDocument, TextLayer, ShapeLayer, FrameLayer } from "./types";
