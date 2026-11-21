@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import {
-  Aperture, CircleHelp, Film, Image as ImageIcon, PanelRight,
+  Aperture, CircleHelp, Film, Image as ImageIcon,
   ArrowDownToLine, Clapperboard, Sparkles,
 } from "lucide-react";
 import ImageStudio from "./editor/ImageStudio";
