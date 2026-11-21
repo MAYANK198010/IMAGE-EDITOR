@@ -6,7 +6,7 @@ import {
   Volume2, Video, X,
 } from "lucide-react";
 
-type Props = { onStatus: (message: string) => void };
+type Props = { onStatus: (message: string) => void; active: boolean };
 type VideoAdjustment = { brightness: number; contrast: number; saturation: number; blur: number; sepia: number; grayscale: number; hue: number };
 type Transition = "cut" | "fade";
 type VideoClip = {
@@ -157,7 +157,7 @@ function fitDimensions(width: number, height: number, resolution: OutputResoluti
   };
 }
 
-export default function VideoStudio({ onStatus }: Props) {
+export default function VideoStudio({ onStatus, active }: Props) {
   const [clips, setClips] = useState<VideoClip[]>([]);
   const [activeClipId, setActiveClipId] = useState<string | null>(null);
   const [localTime, setLocalTime] = useState(0);
@@ -190,6 +190,14 @@ export default function VideoStudio({ onStatus }: Props) {
   const globalPlayhead = activeClip
     ? activeTimelineStart + Math.max(0, localTime - activeClip.trimStart) / activeClip.speed
     : 0;
+
+  useEffect(() => {
+    if (!active) {
+      videoRef.current?.pause();
+      audioRef.current?.pause();
+      setIsPlaying(false);
+    }
+  }, [active]);
 
   useEffect(() => {
     if (!activeClip) {
@@ -923,7 +931,7 @@ export default function VideoStudio({ onStatus }: Props) {
               <>
                 <div className="active-clip-heading"><Music2 size={16}/><span>{audioAsset.name}</span></div>
                 <p className="empty-hint">This music track starts at the beginning of the edited sequence.</p>
-                <audio ref={audioRef} src={audioAsset.url} controls className="audio-player"/>
+                <p className="empty-hint">Music preview stays in sync with the timeline playhead.</p>
                 <label className="range-control"><span><b>Music volume</b><output>{Math.round(audioAsset.volume * 100)}%</output></span><input type="range" min="0" max="1" step="0.01" value={audioAsset.volume} onChange={(event) => setAudioAsset((current) => current ? { ...current, volume: Number(event.target.value) } : current)}/></label>
                 <button className="danger-action" onClick={removeAudioTrack}>Remove audio track</button>
               </>
@@ -968,6 +976,7 @@ export default function VideoStudio({ onStatus }: Props) {
         )}
       </aside>
 
+      <audio ref={audioRef} src={audioAsset?.url} preload="auto" hidden />
       <input ref={videoInputRef} type="file" accept="video/*" multiple hidden onChange={(event) => { if (event.target.files) void appendVideoFiles(event.target.files); event.target.value = ""; }}/>
       <input ref={audioInputRef} type="file" accept="audio/*" hidden onChange={(event) => { void addAudioFile(event.target.files?.[0]); event.target.value = ""; }}/>
     </div>
