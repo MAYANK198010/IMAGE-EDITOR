@@ -203,7 +203,7 @@ export default function App() {
       anchor.href = url;
       anchor.download = `${imageName.replace(/\.[^.]+$/, "")}-edited.png`;
       anchor.click();
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       setStatus("PNG export created");
     }, "image/png");
   };
