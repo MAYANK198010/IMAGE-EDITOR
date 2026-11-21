@@ -39,6 +39,8 @@ A browser-based workspace for image editing and short-form video editing.
 - WebCodecs plus an MP4/WebM muxer for future optimized export
 - FFmpeg.wasm as an optional processing fallback
 
+See [docs/FEATURE-MATRIX.md](docs/FEATURE-MATRIX.md) for the editor benchmark, feature inventory, implementation status and prioritized roadmap.
+
 ## Development
 
 ```bash
