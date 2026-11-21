@@ -535,14 +535,14 @@ export default function VideoStudio({ onStatus }: Props) {
       const fileWindow = window as Window & {
         showSaveFilePicker?: (options?: unknown) => Promise<{ createWritable: () => Promise<WritableStream<Uint8Array>> }>;
       };
-      const filename = \`frameforge-\${Date.now()}.\${exportFormat}\`;
+      const filename = `frameforge-${Date.now()}.${exportFormat}`;
       let writableFile: WritableStream<Uint8Array> | null = null;
 
       if (fileWindow.showSaveFilePicker) {
         try {
           const handle = await fileWindow.showSaveFilePicker({
             suggestedName: filename,
-            types: [{ description: exportFormat.toUpperCase(), accept: { [mimeFor(exportFormat)]: [\`.\${exportFormat}\`] } }],
+            types: [{ description: exportFormat.toUpperCase(), accept: { [mimeFor(exportFormat)]: [`.${exportFormat}`] } }],
           });
           writableFile = await handle.createWritable();
         } catch (error) {
