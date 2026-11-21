@@ -84,28 +84,38 @@ These are feature categories to consider when planning a modern editor. They are
 | Capability | Current state |
 |---|---|
 | React 19 / TypeScript / Vite application shell | Implemented |
-| Local image import and drag-and-drop | Implemented |
-| Image preview and flattened Canvas 2D rendering | Implemented |
+| Separate Image Studio and Video Studio, with projects retained when switching tabs | Implemented |
+| Local image import and image-overlay import | Implemented |
+| Typed image document with text, shape, frame and image-overlay layers | Implemented |
+| Layer selection, canvas dragging, resize handle, visibility, locking, duplication, deletion and z-order controls | Implemented |
+| Layer opacity, rotation and blend modes | Implemented |
+| Text styling: text, colour, font family, size, weight, alignment, italic, shadow and outline | Implemented |
+| Shape objects: rectangle, ellipse, line and star | Implemented |
+| Frame styles: classic, double, polaroid, film strip and neon | Implemented |
 | Brightness, contrast, saturation, blur, grayscale, sepia, hue and invert | Implemented |
-| Eight filter presets | Implemented |
-| Crop aspect ratios: original, free, 1:1, 4:5, 16:9 and 9:16 | Implemented through controls |
-| Crop size and crop position | Implemented through sliders; no on-canvas crop handles |
-| Rotate and horizontal/vertical flip | Implemented |
-| Styled single text overlay (text, colour, size, vertical position) | Implemented; not a draggable multi-layer text system |
-| Press-and-hold original comparison | Implemented |
-| Image undo/redo | Implemented |
-| PNG and JPEG export with JPEG quality setting | Implemented |
-| Import and preview one local video clip | Implemented |
-| Video seek and playback | Implemented |
-| Start/end trim range | Implemented |
-| Playback speed and source volume | Implemented |
-| MediaRecorder export of selected range | Browser-dependent; WebM or MP4 only where capture and MIME support exist |
-| True image layers, masks, blend modes, object selections and retouch brushes | Not implemented |
-| Interactive crop handles, resize canvas, shape/sticker objects and multi-object selection | Not implemented |
-| Multi-clip/multi-track timeline, split/ripple editing, transitions and keyframes | Not implemented |
-| Captions, chroma key, stabilisation, motion tracking, audio mixing and speed curves | Not implemented |
-| Reliable MP4 pipeline with container muxing, codec/bitrate controls and export progress | Not implemented |
-| AI background removal, generative fill and object removal | Not implemented |
+| Vignette and film grain | Implemented |
+| Nine filter presets | Implemented |
+| Crop ratios: original, free, 1:1, 4:5, 16:9 and 9:16 | Implemented |
+| Crop size and position sliders | Implemented; no draggable crop marquee/handles yet |
+| Rotate, flip, image undo/redo and original-image comparison | Implemented |
+| PNG, JPEG and WebP export; original, 1920px, 2560px and 3840px long-edge presets | Implemented; large exports depend on device memory |
+| Multiple local video clips in a sequential timeline | Implemented; clips do not overlap on separate video tracks |
+| Video preview, seeking and sequential playback | Implemented |
+| Clip trim in/out, split, reorder, duplicate and delete | Implemented |
+| Per-clip playback speed, volume, mute and colour/blur adjustments | Implemented |
+| Cut and fade-in-from-black transitions | Implemented |
+| One timed, styled title overlay | Implemented |
+| One imported music/voice file with timeline preview and volume control | Implemented |
+| Source audio and imported music mixed into one export audio track | Implemented |
+| Classic, Film and Neon video frame treatments | Implemented |
+| Mediabunny MP4/WebM export with codec detection, progress and direct-to-disk target where supported | Implemented; browser-dependent |
+| Video output presets: 720p, 1080p, 4K, source/16:9/9:16/1:1/4:5 and 24/25/30/60 FPS | Implemented; encoder and memory limits apply |
+| Image masks, smart selections, retouch brushes, healing and liquify | Not implemented |
+| On-canvas crop marquee/handles, canvas resize and full mask editor | Not implemented |
+| Overlapping multi-track video and overlay timeline, keyframes and speed curves | Not implemented |
+| Multiple independent audio tracks, waveform, audio fades and beat tools | Not implemented |
+| Caption/subtitle tracks, chroma key, stabilisation and motion tracking | Not implemented |
+| AI background removal, generative fill, object removal and transcript editing | Not implemented |
 
 ## 4. Recommended technical architecture
 
