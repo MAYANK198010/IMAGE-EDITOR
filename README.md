@@ -1,47 +1,49 @@
-# IMAGE-EDITOR
+# IMAGE-EDITOR — FrameForge
 
-A browser-based workspace for image editing and short-form video editing.
+A browser-based editor for still images and short-form video clips. The project is local-first: imported media is processed in the browser and is not uploaded to a server by this initial implementation.
 
-> Status: initial scaffold. This repository was empty before initialization.
-
-## Product direction
+## Implemented now
 
 ### Image Studio
-- Import local images (PNG, JPG, WEBP, GIF)
-- Crop, rotate and flip
-- Brightness, contrast, saturation, blur, grayscale and sepia adjustments
-- Filter presets
-- Text and shape overlays
-- Layer ordering, undo/redo and PNG/JPEG export
+- Import local images through the browser file picker or drag-and-drop.
+- Adjust brightness, contrast, saturation, blur, grayscale, sepia, hue and invert.
+- Apply eight built-in filter presets.
+- Crop using Original, Free, 1:1, 4:5, 16:9 and 9:16 ratios, then refine crop size and position with sliders.
+- Rotate and flip the image.
+- Add one styled text overlay with editable text, colour, size and vertical position.
+- Compare the edit with the original using the press-and-hold preview control.
+- Undo and redo image edits.
+- Export flattened PNG or JPEG, with a JPEG quality setting.
 
 ### Video Studio
-- Import local video and audio
-- Preview, seek, trim and split clips
-- Multiple video/audio tracks
-- Playback speed, volume, titles, transitions and aspect-ratio presets
-- Caption/subtitle support
-- Export to browser-supported formats with a robust muxing pipeline
+- Import and preview one local video clip.
+- Seek through the source video and set start/end trim points.
+- Adjust playback speed and original clip volume.
+- Record the selected range to a supported MediaRecorder format (typically WebM; MP4 only when the browser exposes a compatible recorder MIME type).
 
-## Research and architecture notes
+## Current limitations
 
-- **Image editing:** Konva/react-konva provides a practical foundation for a layered canvas, transforms, filters and raster export. Preserve original file assets and keep edits as serializable project state wherever possible.
-- **Video editing:** use an explicit timeline/project model with source media, clip in/out points, track placement, speed, effects and keyframes. A HTML video preview alone is not a full video editing engine.
-- **Browser APIs:** WebCodecs provides low-level frame/audio decode and encode interfaces. It does not itself demux input media containers or mux encoded output, so a container/muxing library is also needed.
-- **Export fallback:** FFmpeg.wasm can process selected media formats in Web Workers, but should be treated as an optional path because CPU and memory usage can be substantial.
-- **Scope:** AI background removal, generative fill, professional color grading, motion tracking and cloud rendering require dedicated models/services or a more substantial backend. They should not be advertised as working features until implemented.
+This is an early browser editor, not yet a full Photoshop, Premiere, Canva or CapCut replacement.
 
-## Planned stack
+- Image editing currently exports a flattened canvas; multiple selectable layers, masks, blend modes, object selection, retouch brushes and draggable text are not implemented.
+- Crop is controlled through ratio and numeric sliders; an interactive crop marquee/handles are not yet implemented.
+- Video editing is a single-source clip trimmer. Multiple tracks, multiple clips, split/ripple editing, transitions, keyframes, speed curves, text/caption tracks, colour effects, chroma key, stabilisation, motion tracking and audio mixing are not implemented.
+- Video export relies on browser media capture and recorder support. Output format and codec availability vary by browser. There is no full MP4/WebM container pipeline yet.
+- AI background removal, generative fill, object removal, transcript editing and cloud rendering are not implemented.
 
-- React + TypeScript + Vite
-- Tailwind CSS
-- Konva / react-konva for image composition
-- Browser media APIs for video preview
-- WebCodecs plus an MP4/WebM muxer for future optimized export
-- FFmpeg.wasm as an optional processing fallback
+## Technology
 
-See [docs/FEATURE-MATRIX.md](docs/FEATURE-MATRIX.md) for the editor benchmark, feature inventory, implementation status and prioritized roadmap.
+- React 19 + TypeScript + Vite
+- Canvas 2D API for image composition, transforms, adjustments and raster export
+- HTMLVideoElement for video preview and seeking
+- MediaRecorder + media-element capture where supported for basic video recording
+- Lucide React icons
 
-## Development
+The next architecture milestone is to formalise the image document/layer model and build a real multi-track video timeline. For robust video export, evaluate WebCodecs together with a container demuxer/muxer; WebCodecs alone does not create finished MP4/WebM files. FFmpeg.wasm should remain an optional fallback because browser-side transcoding can be CPU- and memory-intensive.
+
+## Run locally
+
+Requires a current Node.js release compatible with the engine declared in `package.json`.
 
 ```bash
 npm install
@@ -50,13 +52,18 @@ npm run build
 npm run typecheck
 ```
 
-## Reference documentation
+## Research and roadmap
 
-- Konva: https://konvajs.org/docs/
-- Photopea layers: https://www.photopea.com/learn/layers
-- Photopea adjustments and filters: https://www.photopea.com/learn/adjustments-filters
-- WebCodecs API: https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API
-- FFmpeg.wasm overview: https://ffmpegwasm.netlify.app/docs/overview/
-- Remotion client-side rendering: https://www.remotion.dev/docs/client-side-rendering
+See [docs/FEATURE-MATRIX.md](docs/FEATURE-MATRIX.md) for the competitor feature benchmark, full feature inventory, implementation status, architecture direction and delivery priorities.
 
-This is an initial foundation, not a feature-complete replacement for commercial desktop editors.
+## Technical references
+
+- [Canvas 2D API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
+- [MediaRecorder](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder)
+- [HTMLMediaElement.captureStream()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/captureStream)
+- [WebCodecs API](https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API)
+- [Mediabunny](https://mediabunny.dev/guide/introduction)
+- [FFmpeg.wasm overview](https://ffmpegwasm.netlify.app/docs/overview/)
+- [Photopea layers](https://www.photopea.com/learn/layers)
+- [Photopea adjustments and filters](https://www.photopea.com/learn/adjustments-filters)
+
