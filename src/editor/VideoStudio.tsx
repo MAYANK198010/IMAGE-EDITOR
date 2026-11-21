@@ -49,7 +49,7 @@ const EMPTY_TITLE = { text: "", start: 0, end: 8, color: "#ffffff", size: 5, pos
 function makeId() {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
-    : \`clip-\${Date.now()}-\${Math.random().toString(16).slice(2)}\`;
+    : `clip-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -61,7 +61,7 @@ function formatTime(value: number) {
   const minutes = Math.floor(safe / 60);
   const seconds = Math.floor(safe % 60);
   const tenths = Math.floor((safe % 1) * 10);
-  return \`\${String(minutes).padStart(2, "0")}:\${String(seconds).padStart(2, "0")}.\${tenths}\`;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${tenths}`;
 }
 
 function getClipLength(clip: VideoClip) {
@@ -79,13 +79,13 @@ function getClipStarts(clips: VideoClip[]) {
 
 function videoFilter(adjustment: VideoAdjustment) {
   return [
-    \`brightness(\${adjustment.brightness}%)\`,
-    \`contrast(\${adjustment.contrast}%)\`,
-    \`saturate(\${adjustment.saturation}%)\`,
-    \`blur(\${adjustment.blur}px)\`,
-    \`sepia(\${adjustment.sepia}%)\`,
-    \`grayscale(\${adjustment.grayscale}%)\`,
-    \`hue-rotate(\${adjustment.hue}deg)\`,
+    `brightness(${adjustment.brightness}%)`,
+    `contrast(${adjustment.contrast}%)`,
+    `saturate(${adjustment.saturation}%)`,
+    `blur(${adjustment.blur}px)`,
+    `sepia(${adjustment.sepia}%)`,
+    `grayscale(${adjustment.grayscale}%)`,
+    `hue-rotate(${adjustment.hue}deg)`,
   ].join(" ");
 }
 
@@ -248,7 +248,7 @@ export default function VideoStudio({ onStatus }: Props) {
             probe.load();
             resolve(duration);
           };
-          probe.onerror = () => reject(new Error(\`Unable to read \${file.name}\`));
+          probe.onerror = () => reject(new Error(`Unable to read ${file.name}`));
           probe.src = url;
         });
         if (metadata <= 0) throw new Error("Video duration is invalid");
@@ -268,7 +268,7 @@ export default function VideoStudio({ onStatus }: Props) {
         };
       } catch {
         URL.revokeObjectURL(url);
-        onStatus(\`Could not read video: \${file.name}\`);
+        onStatus(`Could not read video: ${file.name}`);
         return null;
       }
     }));
@@ -280,7 +280,7 @@ export default function VideoStudio({ onStatus }: Props) {
       return next;
     });
     setVideoTab("clips");
-    onStatus(\`\${valid.length} video clip\${valid.length === 1 ? "" : "s"} added to the timeline\`);
+    onStatus(`${valid.length} video clip${valid.length === 1 ? "" : "s"} added to the timeline`);
   };
 
   const addAudioFile = async (file?: File) => {
@@ -426,7 +426,7 @@ export default function VideoStudio({ onStatus }: Props) {
   };
 
   const duplicateClip = (clip: VideoClip) => {
-    const duplicate: VideoClip = { ...clip, id: makeId(), name: \`\${clip.name} copy\`, transition: "fade" };
+    const duplicate: VideoClip = { ...clip, id: makeId(), name: `${clip.name} copy`, transition: "fade" };
     setClips((current) => {
       const index = current.findIndex((item) => item.id === clip.id);
       const result = [...current];
@@ -450,7 +450,7 @@ export default function VideoStudio({ onStatus }: Props) {
     if (!title.text.trim() || time < title.start || time > title.end) return;
     const fontSize = Math.max(24, Math.round(width * title.size / 100));
     context.save();
-    context.font = \`800 \${fontSize}px Arial, sans-serif\`;
+    context.font = `800 ${fontSize}px Arial, sans-serif`;
     context.textAlign = "center";
     context.textBaseline = "middle";
     context.lineJoin = "round";
@@ -503,7 +503,7 @@ export default function VideoStudio({ onStatus }: Props) {
       const fileWindow = window as Window & {
         showSaveFilePicker?: (options?: unknown) => Promise<{ createWritable: () => Promise<WritableStream<Uint8Array>> }>;
       };
-      const filename = \`frameforge-\${Date.now()}.\${exportFormat}\`;
+      const filename = `frameforge-${Date.now()}.${exportFormat}`;
       const outputFormat = exportFormat === "mp4"
         ? new (await import("mediabunny")).Mp4OutputFormat()
         : new (await import("mediabunny")).WebMOutputFormat();
@@ -512,7 +512,7 @@ export default function VideoStudio({ onStatus }: Props) {
         try {
           const handle = await fileWindow.showSaveFilePicker({
             suggestedName: filename,
-            types: [{ description: exportFormat.toUpperCase(), accept: { [mimeFor(exportFormat)]: [\`.\${exportFormat}\`] } }],
+            types: [{ description: exportFormat.toUpperCase(), accept: { [mimeFor(exportFormat)]: [`.${exportFormat}`] } }],
           });
           const writable = await handle.createWritable();
           const media = await import("mediabunny");
@@ -549,7 +549,7 @@ export default function VideoStudio({ onStatus }: Props) {
         width: dimensions.width,
         height: dimensions.height,
       });
-      if (!videoCodec) throw new Error(\`This browser cannot encode \${dimensions.width}×\${dimensions.height} video with the selected format. Try WebM or a lower resolution.\`);
+      if (!videoCodec) throw new Error(`This browser cannot encode ${dimensions.width}×${dimensions.height} video with the selected format. Try WebM or a lower resolution.`);
       const audioCodec = await media.getFirstEncodableAudioCodec(outputFormat.getSupportedAudioCodecs());
       output = new media.Output({ format: outputFormat, target });
       const canvas = document.createElement("canvas");
@@ -589,8 +589,8 @@ export default function VideoStudio({ onStatus }: Props) {
         const input = new media.Input({ source: new media.BlobSource(clip.file), formats: media.ALL_FORMATS });
         inputs.push(input);
         const videoTrack = await input.getPrimaryVideoTrack();
-        if (!videoTrack) throw new Error(\`No video track found in \${clip.name}\`);
-        if (!(await videoTrack.canDecode())) throw new Error(\`This browser cannot decode \${clip.name}\`);
+        if (!videoTrack) throw new Error(`No video track found in ${clip.name}`);
+        if (!(await videoTrack.canDecode())) throw new Error(`This browser cannot decode ${clip.name}`);
         const videoSink = new media.VideoSampleSink(videoTrack);
         const clipDuration = getClipLength(clip);
         const fadeDuration = clip.transition === "fade" ? Math.min(0.55, clipDuration * 0.25) : 0;
@@ -692,13 +692,13 @@ export default function VideoStudio({ onStatus }: Props) {
         if (!buffer) throw new Error("The renderer did not produce a final file.");
         downloadBuffer(buffer, mime, filename);
       }
-      onStatus(\`Export complete · \${dimensions.width}×\${dimensions.height} · \${exportFormat.toUpperCase()}\`);
+      onStatus(`Export complete · ${dimensions.width}×${dimensions.height} · ${exportFormat.toUpperCase()}`);
     } catch (error) {
       if (output && output.state !== "finalized" && output.state !== "canceled") {
         try { await output.cancel(); } catch { /* Output was already closed */ }
       }
       const message = error instanceof Error ? error.message : "Unexpected video export error.";
-      onStatus(\`Export failed: \${message}\`);
+      onStatus(`Export failed: ${message}`);
     } finally {
       inputs.forEach((input) => {
         try { input.dispose(); } catch { /* Ignore already disposed media inputs */ }
@@ -758,9 +758,9 @@ export default function VideoStudio({ onStatus }: Props) {
                   onEnded={advanceToNextClip}
                 />
                 {title.text && globalPlayhead >= title.start && globalPlayhead <= title.end && (
-                  <div className={\`video-title-overlay title-\${title.position}\`} style={{ color: title.color, fontSize: \`clamp(18px, \${title.size}vw, 58px)\` }}>{title.text}</div>
+                  <div className={`video-title-overlay title-${title.position}`} style={{ color: title.color, fontSize: `clamp(18px, ${title.size}vw, 58px)` }}>{title.text}</div>
                 )}
-                {frameStyle !== "none" && <div className={\`video-frame-overlay frame-\${frameStyle}\`}/>}
+                {frameStyle !== "none" && <div className={`video-frame-overlay frame-${frameStyle}`}/>}
                 <div className="video-preview-controls">
                   <button className="play-button" onClick={() => void togglePlayback()} aria-label={isPlaying ? "Pause" : "Play"}>
                     {isPlaying ? <Pause size={17}/> : <Play size={17}/>}
@@ -782,7 +782,7 @@ export default function VideoStudio({ onStatus }: Props) {
           </div>
           <div className="studio-canvas-footer">
             <span>{clips.length} clip{clips.length === 1 ? "" : "s"} · {fps} FPS target</span>
-            <span>{activeClip ? \`\${activeClip.speed.toFixed(2)}× speed\` : "No clips"}</span>
+            <span>{activeClip ? `${activeClip.speed.toFixed(2)}× speed` : "No clips"}</span>
           </div>
         </div>
 
@@ -798,7 +798,7 @@ export default function VideoStudio({ onStatus }: Props) {
             <div className="video-track-label"><Video size={14}/> VIDEO</div>
             <div className="video-track-content">
               {clips.map((clip, index) => (
-                <div key={clip.id} className={clip.id === activeClip?.id ? "video-timeline-clip active" : "video-timeline-clip"} style={{ flex: \`\${Math.max(0.35, getClipLength(clip))} 1 0\` }} onClick={() => selectClip(clip)} role="button" tabIndex={0} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") selectClip(clip); }}>
+                <div key={clip.id} className={clip.id === activeClip?.id ? "video-timeline-clip active" : "video-timeline-clip"} style={{ flex: `${Math.max(0.35, getClipLength(clip))} 1 0` }} onClick={() => selectClip(clip)} role="button" tabIndex={0} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") selectClip(clip); }}>
                   <div className="clip-thumb"><Film size={14}/></div>
                   <div className="clip-meta"><b>{clip.name}</b><small>{formatTime(clip.trimStart)}–{formatTime(clip.trimEnd)} · {clip.speed}×</small></div>
                   {clip.transition === "fade" && <span className="transition-tag">FADE</span>}
@@ -846,7 +846,7 @@ export default function VideoStudio({ onStatus }: Props) {
                 <label className="range-control"><span><b>Trim in</b><output>{formatTime(activeClip.trimStart)}</output></span><input type="range" min="0" max={Math.max(activeClip.duration - 0.08, 0.1)} step="0.02" value={activeClip.trimStart} onChange={(event) => { const start = Math.min(Number(event.target.value), activeClip.trimEnd - 0.08); updateClip(activeClip.id, (clip) => ({ ...clip, trimStart: Math.max(0, start) })); if (activeIndex === clips.length - 1 || activeIndex >= 0) setLocalTime(Math.max(0, start)); }}/></label>
                 <label className="range-control"><span><b>Trim out</b><output>{formatTime(activeClip.trimEnd)}</output></span><input type="range" min={Math.min(activeClip.trimStart + 0.08, activeClip.duration)} max={activeClip.duration} step="0.02" value={activeClip.trimEnd} onChange={(event) => updateClip(activeClip.id, (clip) => ({ ...clip, trimEnd: Math.max(clip.trimStart + 0.08, Number(event.target.value)) }))}/></label>
                 <label className="range-control"><span><b>Speed</b><output>{activeClip.speed.toFixed(2)}×</output></span><input type="range" min="0.25" max="2" step="0.05" value={activeClip.speed} onChange={(event) => updateClip(activeClip.id, (clip) => ({ ...clip, speed: Number(event.target.value) }))}/></label>
-                <label className="range-control"><span><b>Volume</b><output>{activeClip.muted ? "Muted" : \`\${Math.round(activeClip.volume * 100)}%\`}</output></span><input type="range" min="0" max="1" step="0.01" value={activeClip.volume} onChange={(event) => updateClip(activeClip.id, (clip) => ({ ...clip, volume: Number(event.target.value) }))}/></label>
+                <label className="range-control"><span><b>Volume</b><output>{activeClip.muted ? "Muted" : `${Math.round(activeClip.volume * 100)}%`}</output></span><input type="range" min="0" max="1" step="0.01" value={activeClip.volume} onChange={(event) => updateClip(activeClip.id, (clip) => ({ ...clip, volume: Number(event.target.value) }))}/></label>
                 <label className="check-setting"><input type="checkbox" checked={activeClip.muted} onChange={(event) => updateClip(activeClip.id, (clip) => ({ ...clip, muted: event.target.checked }))}/> Mute source clip audio</label>
                 <label className="field-control">Transition into clip<select value={activeClip.transition} onChange={(event) => updateClip(activeClip.id, (clip) => ({ ...clip, transition: event.target.value as Transition }))}><option value="cut">Cut</option><option value="fade">Fade from black</option></select></label>
                 <div className="property-heading effects-heading"><strong>Clip effects</strong></div>
@@ -914,7 +914,7 @@ export default function VideoStudio({ onStatus }: Props) {
             <label className="field-control">Frame rate<select value={fps} onChange={(event) => setFps(Number(event.target.value))}><option value={24}>24 FPS</option><option value={25}>25 FPS</option><option value={30}>30 FPS</option><option value={60}>60 FPS</option></select></label>
             <label className="field-control">Frame treatment<select value={frameStyle} onChange={(event) => setFrameStyle(event.target.value as typeof frameStyle)}><option value="none">None</option><option value="classic">Classic border</option><option value="film">Film strip</option><option value="neon">Neon frame</option></select></label>
             <p className="empty-hint">The browser must support the selected codec and resolution. Large 4K projects are faster with hardware encoding and direct-to-disk saving.</p>
-            {exporting && <div className="export-progress"><div><span>Rendering video…</span><b>{Math.round(progress)}%</b></div><div className="progress-track"><i style={{ width: \`\${progress}%\` }}/></div></div>}
+            {exporting && <div className="export-progress"><div><span>Rendering video…</span><b>{Math.round(progress)}%</b></div><div className="progress-track"><i style={{ width: `${progress}%` }}/></div></div>}
             <button className="primary-button export-wide" onClick={() => void renderExport()} disabled={!clips.length || exporting}>
               {exporting ? <><span className="spinner"/> Rendering…</> : <><ArrowDownToLine size={16}/> Export {exportFormat.toUpperCase()}</>}
             </button>
