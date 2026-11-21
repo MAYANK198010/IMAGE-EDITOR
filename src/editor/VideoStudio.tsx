@@ -362,7 +362,18 @@ export default function VideoStudio({ onStatus, active }: Props) {
   };
 
   const updateClip = (id: string, updater: (clip: VideoClip) => VideoClip) => {
-    setClips((current) => current.map((clip) => clip.id === id ? updater(clip) : clip));
+    const currentClip = clips.find((clip) => clip.id === id);
+    if (!currentClip) return;
+    const updatedClip = updater(currentClip);
+    setClips((current) => current.map((clip) => clip.id === id ? updatedClip : clip));
+    if (activeClip?.id === id && videoRef.current) {
+      if (updatedClip.speed !== currentClip.speed) {
+        videoRef.current.playbackRate = updatedClip.speed;
+      }
+      if (updatedClip.volume !== currentClip.volume || updatedClip.muted !== currentClip.muted) {
+        videoRef.current.volume = updatedClip.muted ? 0 : updatedClip.volume;
+      }
+    }
   };
 
   const selectClip = (clip: VideoClip) => {
@@ -668,10 +679,6 @@ export default function VideoStudio({ onStatus, active }: Props) {
 
       const timelineTotal = Math.max(0.1, totalDuration);
       let timelineCursor = 0;
-      const previousFrame = document.createElement("canvas");
-      previousFrame.width = dimensions.width;
-      previousFrame.height = dimensions.height;
-      const previousContext = previousFrame.getContext("2d");
       for (let clipIndex = 0; clipIndex < clips.length; clipIndex += 1) {
         const clip = clips[clipIndex];
         const input = new media.Input({ source: new media.BlobSource(clip.file), formats: media.ALL_FORMATS });
@@ -682,7 +689,6 @@ export default function VideoStudio({ onStatus, active }: Props) {
         const videoSink = new media.VideoSampleSink(videoTrack);
         const clipDuration = getClipLength(clip);
         const fadeDuration = clip.transition === "fade" ? Math.min(0.55, clipDuration * 0.25) : 0;
-        let lastFrameAvailable = false;
 
         for await (const sample of videoSink.samples(clip.trimStart, clip.trimEnd)) {
           const sourceStart = Math.max(clip.trimStart, sample.timestamp);
@@ -694,11 +700,10 @@ export default function VideoStudio({ onStatus, active }: Props) {
           context.save();
           context.fillStyle = "#08090d";
           context.fillRect(0, 0, dimensions.width, dimensions.height);
-          context.filter = videoFilter(clip.adjustments);
-          if (fadeDuration > 0 && localTime < fadeDuration && lastFrameAvailable) {
-            context.drawImage(previousFrame, 0, 0);
+          if (fadeDuration > 0 && localTime < fadeDuration) {
             context.globalAlpha = clamp(localTime / fadeDuration, 0, 1);
           }
+          context.filter = videoFilter(clip.adjustments);
           sample.drawWithFit(context, { fit: "contain" });
           context.restore();
           const globalTime = timelineCursor + localTime;
@@ -706,11 +711,6 @@ export default function VideoStudio({ onStatus, active }: Props) {
           drawVideoFrame(context, dimensions.width, dimensions.height);
           const duration = Math.min(Math.max(1 / fps, sample.duration / clip.speed), clipDuration - localTime);
           await videoSource.add(globalTime, duration);
-          if (previousContext) {
-            previousContext.clearRect(0, 0, dimensions.width, dimensions.height);
-            previousContext.drawImage(canvas, 0, 0);
-            lastFrameAvailable = true;
-          }
           sample.close();
           setProgress(clamp((globalTime / timelineTotal) * 82, 0, 82));
         }
@@ -937,7 +937,7 @@ export default function VideoStudio({ onStatus, active }: Props) {
                 <label className="range-control"><span><b>Speed</b><output>{activeClip.speed.toFixed(2)}×</output></span><input type="range" min="0.25" max="2" step="0.05" value={activeClip.speed} onChange={(event) => updateClip(activeClip.id, (clip) => ({ ...clip, speed: Number(event.target.value) }))}/></label>
                 <label className="range-control"><span><b>Volume</b><output>{activeClip.muted ? "Muted" : `${Math.round(activeClip.volume * 100)}%`}</output></span><input type="range" min="0" max="1" step="0.01" value={activeClip.volume} onChange={(event) => updateClip(activeClip.id, (clip) => ({ ...clip, volume: Number(event.target.value) }))}/></label>
                 <label className="check-setting"><input type="checkbox" checked={activeClip.muted} onChange={(event) => updateClip(activeClip.id, (clip) => ({ ...clip, muted: event.target.checked }))}/> Mute source clip audio</label>
-                <label className="field-control">Transition into clip<select value={activeClip.transition} onChange={(event) => updateClip(activeClip.id, (clip) => ({ ...clip, transition: event.target.value as Transition }))}><option value="cut">Cut</option><option value="fade">Fade from black</option></select></label>
+                <label className="field-control">Transition into clip<select value={activeClip.transition} onChange={(event) => updateClip(activeClip.id, (clip) => ({ ...clip, transition: event.target.value as Transition }))}><option value="cut">Cut</option><option value="fade">Fade in from black</option></select></label>
                 <div className="property-heading effects-heading"><strong>Clip effects</strong></div>
                 {([
                   ["Brightness", "brightness", 0, 200],
@@ -965,14 +965,14 @@ export default function VideoStudio({ onStatus, active }: Props) {
             {audioAsset ? (
               <>
                 <div className="active-clip-heading"><Music2 size={16}/><span>{audioAsset.name}</span></div>
-                <p className="empty-hint">This music track starts at the beginning of the edited sequence.</p>
+                <p className="empty-hint">Music begins at the start of the sequence and is mixed with clip audio during export.</p>
                 <p className="empty-hint">Music preview stays in sync with the timeline playhead.</p>
                 <label className="range-control"><span><b>Music volume</b><output>{Math.round(audioAsset.volume * 100)}%</output></span><input type="range" min="0" max="1" step="0.01" value={audioAsset.volume} onChange={(event) => setAudioAsset((current) => current ? { ...current, volume: Number(event.target.value) } : current)}/></label>
                 <button className="danger-action" onClick={removeAudioTrack}>Remove audio track</button>
               </>
             ) : (
               <>
-                <p className="empty-hint">Add a music or voice audio file. It will be mixed into the exported video as a separate audio track.</p>
+                <p className="empty-hint">Add a music or voice audio file. It is mixed with original clip sound in the exported video.</p>
                 <button className="primary-button export-wide" onClick={() => audioInputRef.current?.click()}><Upload size={15}/> Import audio</button>
               </>
             )}
