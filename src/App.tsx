@@ -564,7 +564,6 @@ export default function App() {
 
   const canExportImage = Boolean(imageElement);
   const canExportVideo = Boolean(videoUrl && videoDuration > 0);
-  const originalSize = imageElement ? getRotatedSize(imageElement, edit.rotation) : { width: 0, height: 0 };
 
   const onDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
