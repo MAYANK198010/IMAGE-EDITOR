@@ -530,27 +530,21 @@ export default function VideoStudio({ onStatus }: Props) {
     let output: import("mediabunny").Output | null = null;
     const inputs: Array<import("mediabunny").Input> = [];
     try {
-      // File System Access streams avoid holding a 4K render entirely in RAM where supported.
+      // Request the destination before any awaited dynamic imports so the
+      // browser's transient user activation from the Export click is preserved.
       const fileWindow = window as Window & {
         showSaveFilePicker?: (options?: unknown) => Promise<{ createWritable: () => Promise<WritableStream<Uint8Array>> }>;
       };
-      const filename = `frameforge-${Date.now()}.${exportFormat}`;
-      const outputFormat = exportFormat === "mp4"
-        ? new (await import("mediabunny")).Mp4OutputFormat()
-        : new (await import("mediabunny")).WebMOutputFormat();
-      let target: import("mediabunny").BufferTarget | import("mediabunny").StreamTarget;
+      const filename = \`frameforge-\${Date.now()}.\${exportFormat}\`;
+      let writableFile: WritableStream<Uint8Array> | null = null;
+
       if (fileWindow.showSaveFilePicker) {
         try {
           const handle = await fileWindow.showSaveFilePicker({
             suggestedName: filename,
-            types: [{ description: exportFormat.toUpperCase(), accept: { [mimeFor(exportFormat)]: [`.${exportFormat}`] } }],
+            types: [{ description: exportFormat.toUpperCase(), accept: { [mimeFor(exportFormat)]: [\`.\${exportFormat}\`] } }],
           });
-          const writable = await handle.createWritable();
-          const media = await import("mediabunny");
-          // Mediabunny emits positioned write chunks; FileSystemWritableFileStream
-          // implements the same runtime command shape, but TS models it with a
-          // broader WritableStream type, so narrow it at this adapter boundary.
-          target = new media.StreamTarget(writable as unknown as WritableStream<StreamTargetChunk>, { chunked: true });
+          writableFile = await handle.createWritable();
         } catch (error) {
           if (error instanceof DOMException && error.name === "AbortError") {
             onStatus("Export cancelled");
@@ -558,8 +552,21 @@ export default function VideoStudio({ onStatus }: Props) {
           }
           throw error;
         }
+      }
+
+      const media = await import("mediabunny");
+      const outputFormat = exportFormat === "mp4"
+        ? new media.Mp4OutputFormat()
+        : new media.WebMOutputFormat();
+      let target: import("mediabunny").BufferTarget | import("mediabunny").StreamTarget;
+      if (writableFile) {
+        // StreamTarget writes { type: "write", data, position } chunks. This
+        // is also the command shape understood by FileSystemWritableFileStream.
+        target = new media.StreamTarget(
+          writableFile as unknown as WritableStream<StreamTargetChunk>,
+          { chunked: true },
+        );
       } else {
-        const media = await import("mediabunny");
         target = new media.BufferTarget();
         if (totalDuration > 45 || resolution === "4k") {
           onStatus("This browser has no direct-to-disk export. Large/4K output may exceed available memory.");
