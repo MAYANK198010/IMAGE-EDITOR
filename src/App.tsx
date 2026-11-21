@@ -94,6 +94,7 @@ export default function App() {
       setStatus("Please choose a supported image file.");
       return;
     }
+    if (imageUrl) URL.revokeObjectURL(imageUrl);
     setImageUrl(URL.createObjectURL(file));
     setImageName(file.name);
     setAdjustments(DEFAULT_ADJUSTMENTS);
@@ -119,7 +120,7 @@ export default function App() {
     };
     image.onerror = () => setStatus("The selected image could not be opened.");
     image.src = imageUrl;
-    return () => URL.revokeObjectURL(imageUrl);
+    return () => { image.onload = null; };
   }, [imageUrl]);
 
   const drawImage = useCallback(() => {
@@ -174,7 +175,7 @@ export default function App() {
       setTrimEnd(0);
       return;
     }
-    return () => URL.revokeObjectURL(videoUrl);
+    return undefined;
   }, [videoUrl]);
 
   const updateAdjustment = (key: keyof Adjustments, value: number) => {
@@ -213,6 +214,7 @@ export default function App() {
       setStatus("Please choose a supported video file.");
       return;
     }
+    if (videoUrl) URL.revokeObjectURL(videoUrl);
     setVideoUrl(URL.createObjectURL(file));
     setVideoName(file.name);
     setSpeed(1);
