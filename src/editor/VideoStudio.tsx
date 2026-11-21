@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { StreamTargetChunk } from "mediabunny";
 import {
   AudioLines, ArrowDownToLine, ArrowLeft, ArrowRight, Clapperboard,
   Copy, Film, Music2, Pause, Play, Plus, Scissors, Trash2, Type, Upload,
@@ -519,7 +520,7 @@ export default function VideoStudio({ onStatus }: Props) {
           // Mediabunny emits positioned write chunks; FileSystemWritableFileStream
           // implements the same runtime command shape, but TS models it with a
           // broader WritableStream type, so narrow it at this adapter boundary.
-          target = new media.StreamTarget(writable as unknown as WritableStream<media.StreamTargetChunk>, { chunked: true });
+          target = new media.StreamTarget(writable as unknown as WritableStream<StreamTargetChunk>, { chunked: true });
         } catch (error) {
           if (error instanceof DOMException && error.name === "AbortError") {
             onStatus("Export cancelled");
