@@ -1,4 +1,4 @@
-import type { AdjustmentState, CropRect, EditableLayer, ImageEditDocument } from "./types";
+import type { AdjustmentState, CropRect, EditableLayer, ImageEditDocument, LayerBase } from "./types";
 
 export const DEFAULT_ADJUSTMENTS: AdjustmentState = {
   brightness: 100,
