@@ -139,6 +139,41 @@ function processAudioBuffer(
   return output;
 }
 
+function mixAudioBuffer(
+  base: AudioBuffer,
+  music: AudioBuffer | null,
+  musicStartSeconds: number,
+  musicVolume: number,
+) {
+  const sampleRate = 48000;
+  const channels = 2;
+  const length = Math.max(1, Math.ceil(base.duration * sampleRate));
+  const mixed = new AudioBuffer({ numberOfChannels: channels, length, sampleRate });
+
+  const readSample = (buffer: AudioBuffer, channel: number, framePosition: number) => {
+    if (framePosition < 0 || framePosition >= buffer.length) return 0;
+    const safeChannel = buffer.numberOfChannels === 1 ? 0 : Math.min(channel, buffer.numberOfChannels - 1);
+    const data = buffer.getChannelData(safeChannel);
+    const left = Math.floor(framePosition);
+    const right = Math.min(buffer.length - 1, left + 1);
+    const fraction = framePosition - left;
+    return data[left] * (1 - fraction) + data[right] * fraction;
+  };
+
+  for (let channel = 0; channel < channels; channel += 1) {
+    const destination = mixed.getChannelData(channel);
+    for (let frame = 0; frame < length; frame += 1) {
+      const seconds = frame / sampleRate;
+      const basePosition = seconds * base.sampleRate;
+      const baseValue = readSample(base, channel, basePosition);
+      const musicPosition = (musicStartSeconds + seconds) * (music?.sampleRate ?? sampleRate);
+      const musicValue = music ? readSample(music, channel, musicPosition) * musicVolume : 0;
+      destination[frame] = clamp(baseValue + musicValue, -1, 1);
+    }
+  }
+  return mixed;
+}
+
 function fitDimensions(width: number, height: number, resolution: OutputResolution, aspect: AspectRatio) {
   const edge = resolution === "4k" ? 3840 : resolution === "1080" ? 1920 : 1280;
   let ratio = width / Math.max(1, height);
@@ -599,6 +634,15 @@ export default function VideoStudio({ onStatus, active }: Props) {
       });
       if (!videoCodec) throw new Error(`This browser cannot encode ${dimensions.width}×${dimensions.height} video with the selected format. Try WebM or a lower resolution.`);
       const audioCodec = await media.getFirstEncodableAudioCodec(outputFormat.getSupportedAudioCodecs());
+      let musicBuffer: AudioBuffer | null = null;
+      if (audioAsset && audioCodec) {
+        const audioContext = new AudioContext({ sampleRate: 48000 });
+        try {
+          musicBuffer = await audioContext.decodeAudioData(await audioAsset.file.arrayBuffer());
+        } finally {
+          await audioContext.close();
+        }
+      }
       output = new media.Output({ format: outputFormat, target });
       const canvas = document.createElement("canvas");
       canvas.width = dimensions.width;
@@ -612,15 +656,11 @@ export default function VideoStudio({ onStatus, active }: Props) {
       });
       output.addVideoTrack(videoSource, { frameRate: fps });
 
-      let audioSource: import("mediabunny").AudioBufferSource | null = null;
-      if (audioCodec) {
-        audioSource = new media.AudioBufferSource({ codec: audioCodec, quality: new media.Quality("high") });
-        output.addAudioTrack(audioSource, { name: "Original clip audio" });
-      }
-      let musicSource: import("mediabunny").AudioBufferSource | null = null;
-      if (audioAsset && audioCodec) {
-        musicSource = new media.AudioBufferSource({ codec: audioCodec, quality: new media.Quality("high") });
-        output.addAudioTrack(musicSource, { name: "Music" });
+      const audioSource = audioCodec
+        ? new media.AudioBufferSource({ codec: audioCodec, quality: new media.Quality("high") })
+        : null;
+      if (audioSource) {
+        output.addAudioTrack(audioSource, { name: "Mixed audio" });
       }
 
       output.setMetadataTags({ title: "FrameForge Edit", date: new Date() });
@@ -687,7 +727,12 @@ export default function VideoStudio({ onStatus, active }: Props) {
               if (partEnd <= partStart) continue;
               const localStart = (partStart - clip.trimStart) / clip.speed;
               if (localStart > audioCursor + 0.01) {
-                await audioSource.add(silenceBuffer(localStart - audioCursor));
+                await audioSource.add(mixAudioBuffer(
+                  silenceBuffer(localStart - audioCursor),
+                  musicBuffer,
+                  timelineCursor + audioCursor,
+                  audioAsset?.volume ?? 0,
+                ));
               }
               const processed = processAudioBuffer(
                 wrapped.buffer,
@@ -696,12 +741,22 @@ export default function VideoStudio({ onStatus, active }: Props) {
                 clip.speed,
                 clip.muted ? 0 : clip.volume,
               );
-              await audioSource.add(processed);
+              await audioSource.add(mixAudioBuffer(
+                processed,
+                musicBuffer,
+                timelineCursor + localStart,
+                audioAsset?.volume ?? 0,
+              ));
               audioCursor = Math.max(audioCursor, localStart + processed.duration);
             }
           }
           if (audioCursor < clipDuration) {
-            await audioSource.add(silenceBuffer(clipDuration - audioCursor));
+            await audioSource.add(mixAudioBuffer(
+              silenceBuffer(clipDuration - audioCursor),
+              musicBuffer,
+              timelineCursor + audioCursor,
+              audioAsset?.volume ?? 0,
+            ));
           }
         }
         setProgress(clamp((timelineCursor / timelineTotal) * 82, 0, 82));
@@ -709,27 +764,7 @@ export default function VideoStudio({ onStatus, active }: Props) {
       videoSource.close();
       audioSource?.close();
 
-      if (audioAsset && musicSource) {
-        const audioInput = new media.Input({ source: new media.BlobSource(audioAsset.file), formats: media.ALL_FORMATS });
-        inputs.push(audioInput);
-        const audioTrack = await audioInput.getPrimaryAudioTrack();
-        if (audioTrack && await audioTrack.canDecode()) {
-          const sink = new media.AudioBufferSink(audioTrack);
-          let cursor = 0;
-          for await (const wrapped of sink.buffers(0, Math.min(totalDuration, audioAsset.duration))) {
-            if (wrapped.timestamp > cursor + 0.01) {
-              await musicSource.add(silenceBuffer(wrapped.timestamp - cursor));
-            }
-            const buffer = processAudioBuffer(wrapped.buffer, 0, wrapped.duration, 1, audioAsset.volume);
-            await musicSource.add(buffer);
-            cursor = wrapped.timestamp + wrapped.duration;
-          }
-          if (cursor < totalDuration) await musicSource.add(silenceBuffer(totalDuration - cursor));
-        } else {
-          await musicSource.add(silenceBuffer(totalDuration));
-        }
-        musicSource.close();
-      }
+
 
       setProgress(90);
       await output.finalize();
