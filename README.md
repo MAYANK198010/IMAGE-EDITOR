@@ -43,10 +43,10 @@ The next architecture milestone is to formalise the image document/layer model a
 
 ## Run locally
 
-Requires a current Node.js release compatible with the engine declared in `package.json`.
+Requires a current Node.js release compatible with the engine declared in `package.json`. The committed `package-lock.json` pins the dependency tree; use `npm ci` for clean, reproducible installs.
 
 ```bash
-npm install
+npm ci
 npm run dev
 npm run build
 npm run typecheck
