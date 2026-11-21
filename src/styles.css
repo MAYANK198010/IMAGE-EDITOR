@@ -139,3 +139,182 @@ button:disabled{opacity:.35;cursor:not-allowed}
   .crop-ratios{grid-template-columns:repeat(3,minmax(0,1fr))}
   .modal-actions{flex-wrap:wrap}
 }
+
+/* FrameForge studio workspace */
+.frameforge-shell{min-height:100vh;display:flex;flex-direction:column}
+.frameforge-shell .topbar{flex:none}
+.frameforge-workspace{height:calc(100vh - 105px);min-height:650px;display:block;overflow:hidden}
+.frameforge-workspace .studio-grid{height:100%;display:grid;grid-template-columns:76px minmax(0,1fr) 315px;min-width:0;overflow:hidden}
+.frameforge-workspace .studio-toolbar{border-right:1px solid #292e39;background:#10131b;display:flex;align-items:center;flex-direction:column;padding:14px 8px;gap:7px}
+.frameforge-workspace .studio-toolbar button{width:60px;height:58px;border:0;border-radius:9px;background:transparent;color:#828b9b;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:9px}
+.frameforge-workspace .studio-toolbar button svg{width:18px;height:18px}
+.frameforge-workspace .studio-toolbar button:hover,.frameforge-workspace .studio-toolbar button:disabled:hover{background:#242332;color:#c9bcff}
+.frameforge-workspace .studio-toolbar button:disabled{opacity:.35;cursor:not-allowed}
+.frameforge-workspace .studio-main{min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.frameforge-workspace .studio-toolbar-row{height:52px;flex:none;background:#11141c;border-bottom:1px solid #292e39;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 13px}
+.frameforge-workspace .doc-label{min-width:0;display:flex;align-items:center;gap:8px;color:#c6cad3;font-size:11px}
+.frameforge-workspace .doc-label svg{flex:none;color:#a99af3}
+.frameforge-workspace .doc-label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px}
+.frameforge-workspace .studio-actions{display:flex;align-items:center;gap:4px;flex:none}
+.frameforge-workspace .mini-tool{height:29px;min-width:29px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:6px;background:transparent;color:#9da5b3;padding:0 7px}
+.frameforge-workspace .mini-tool:hover{background:#252a36;color:#fff}
+.frameforge-workspace .mini-tool:disabled{opacity:.3;cursor:not-allowed}
+.frameforge-workspace .zoom-readout{min-width:54px;text-align:center;color:#9299a8;font:10px 'DM Mono',monospace}
+.frameforge-workspace .studio-canvas-area{position:relative;flex:1;min-height:260px;overflow:hidden;display:flex;align-items:center;justify-content:center;background-color:#0c0e14;background-image:radial-gradient(#292d38 .7px,transparent .7px);background-size:18px 18px}
+.frameforge-workspace .studio-canvas-area.is-dragging{outline:2px dashed #9b89ef;outline-offset:-8px;background-color:#18162a}
+.frameforge-workspace .studio-canvas-wrap{transform-origin:center;max-width:calc(100% - 56px);max-height:calc(100% - 56px);display:flex;align-items:center;justify-content:center}
+.frameforge-workspace .editor-canvas{display:block;width:auto;height:auto;max-width:min(900px,calc(100vw - 475px));max-height:calc(100vh - 370px);background:#12151d;box-shadow:0 18px 60px #0008;touch-action:none;cursor:crosshair}
+.frameforge-workspace .studio-empty{display:flex;flex-direction:column;align-items:center;text-align:center;max-width:390px;padding:20px}
+.frameforge-workspace .studio-empty .empty-art{height:92px;width:92px;display:grid;place-items:center;margin-bottom:20px;color:#b7a8ff;background:linear-gradient(145deg,#242032,#151720);border:1px solid #3a3450;border-radius:23px}
+.frameforge-workspace .studio-empty h2{font-size:18px;margin:0 0 8px;font-weight:600}
+.frameforge-workspace .studio-empty p{font-size:12px;color:#87909e;line-height:1.6;margin:0 0 18px}
+.frameforge-workspace .studio-empty small{font:9px 'DM Mono',monospace;color:#657080;letter-spacing:1px;margin-top:13px}
+.frameforge-workspace .studio-canvas-footer{position:absolute;bottom:0;left:0;right:0;height:26px;background:#11141ce8;border-top:1px solid #292e39;padding:0 13px;display:flex;align-items:center;justify-content:space-between;color:#7d8796;font:9px 'DM Mono',monospace}
+.frameforge-workspace .studio-bottom{height:150px;flex:none;background:#11141b;border-top:1px solid #292e39;padding:10px 14px;overflow:hidden}
+.frameforge-workspace .bottom-heading{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.frameforge-workspace .bottom-heading strong{font-size:10px;letter-spacing:1px;color:#d6d9e1}
+.frameforge-workspace .bottom-heading small{font-size:10px;color:#727d8d}
+.frameforge-workspace .filter-preset-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:5px}
+.frameforge-workspace .filter-preset-row button{min-width:65px;border:0;background:transparent;color:#9099a8;text-align:center;font-size:9px;padding:0}
+.frameforge-workspace .filter-preset-row button:disabled{opacity:.3}
+.frameforge-workspace .filter-tile{position:relative;display:block;width:62px;height:77px;margin:0 auto 5px;border-radius:7px;border:1px solid #3b4050;background:linear-gradient(145deg,#393548,#1a2632);overflow:hidden}
+.frameforge-workspace .filter-tile img{width:100%;height:100%;object-fit:cover}
+.frameforge-workspace .filter-mono img{filter:grayscale(1)}
+.frameforge-workspace .filter-warm img{filter:sepia(.35) saturate(1.1)}
+.frameforge-workspace .filter-cool img{filter:saturate(.9) hue-rotate(15deg)}
+.frameforge-workspace .filter-fade img{filter:contrast(.84) brightness(1.08)}
+.frameforge-workspace .filter-punch img{filter:contrast(1.3) saturate(1.3)}
+.frameforge-workspace .filter-vintage img{filter:sepia(.45) saturate(.82)}
+.frameforge-workspace .filter-dream img{filter:brightness(1.08) saturate(1.12)}
+.frameforge-workspace .filter-negative img{filter:invert(1)}
+.frameforge-workspace .studio-properties{background:#11141b;border-left:1px solid #292e39;overflow-y:auto;padding:14px 13px 28px;min-width:0}
+.frameforge-workspace .property-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;padding:4px;border:1px solid #2b303c;border-radius:9px;background:#0c0f16;margin-bottom:16px}
+.frameforge-workspace .property-tabs button{min-width:0;border:0;border-radius:6px;background:transparent;color:#8e97a6;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 3px;text-transform:capitalize;font-size:9px}
+.frameforge-workspace .property-tabs button.active{background:#29263b;color:#e4ddff;box-shadow:inset 0 0 0 1px #51496f}
+.frameforge-workspace .property-section{display:flex;flex-direction:column;gap:13px}
+.frameforge-workspace .property-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.frameforge-workspace .property-heading strong{font-size:12px;color:#e4e7ed}
+.frameforge-workspace .property-heading button{width:26px;height:26px;display:grid;place-items:center;border:1px solid #353b49;border-radius:6px;background:#191d27;color:#b3a5f4}
+.frameforge-workspace .empty-hint{font-size:10px;color:#7f8998;line-height:1.55;margin:0;padding:10px;background:#191d27;border:1px dashed #343b49;border-radius:7px}
+.frameforge-workspace .layer-list{display:flex;flex-direction:column;gap:5px}
+.frameforge-workspace .layer-card{display:flex;align-items:center;gap:2px;min-height:38px;padding:3px 4px;background:#191d27;border:1px solid #2c3240;border-radius:7px}
+.frameforge-workspace .layer-card.selected{background:#242238;border-color:#7567bb}
+.frameforge-workspace .layer-select{flex:1;min-width:0;display:flex;align-items:center;gap:7px;border:0;background:transparent;color:#c3c8d2;text-align:left;padding:5px;font-size:10px}
+.frameforge-workspace .layer-select svg{flex:none;color:#b4a4f6}
+.frameforge-workspace .layer-select span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frameforge-workspace .layer-icon{width:23px;height:25px;flex:none;border:0;border-radius:4px;background:transparent;color:#838d9d;display:grid;place-items:center}
+.frameforge-workspace .layer-icon:hover{background:#303044;color:#e6e2ff}
+.frameforge-workspace .layer-properties{border-top:1px solid #303541;margin-top:3px;padding-top:12px;display:flex;flex-direction:column;gap:12px}
+.frameforge-workspace .field-control{display:flex;flex-direction:column;gap:6px;color:#aeb6c4;font-size:10px;min-width:0}
+.frameforge-workspace .field-control input:not([type="color"]):not([type="checkbox"]),.frameforge-workspace .field-control select,.frameforge-workspace .field-control textarea{width:100%;background:#0d1017;color:#e5e7eb;border:1px solid #353c4a;border-radius:6px;padding:8px;font-size:10px;min-width:0}
+.frameforge-workspace .field-control input[type="color"]{width:100%;height:31px;background:#0d1017;border:1px solid #353c4a;border-radius:6px;padding:3px}
+.frameforge-workspace .field-control textarea{resize:vertical;min-height:54px}
+.frameforge-workspace .two-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px;min-width:0}
+.frameforge-workspace .range-control{display:flex;flex-direction:column;gap:7px}
+.frameforge-workspace .range-control>span{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#bbc2ce;font-size:10px}
+.frameforge-workspace .range-control b{font-weight:500}
+.frameforge-workspace .range-control output{color:#a99af3;font:10px 'DM Mono',monospace;white-space:nowrap}
+.frameforge-workspace .range-control input{width:100%;accent-color:#9b89ef;height:3px;cursor:pointer}
+.frameforge-workspace .layer-order-actions,.frameforge-workspace .clip-management{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.frameforge-workspace .layer-order-actions button,.frameforge-workspace .clip-management button{border:1px solid #343b49;border-radius:6px;background:#1b202b;color:#aeb6c4;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 5px;font-size:9px}
+.frameforge-workspace .layer-order-actions button:hover,.frameforge-workspace .clip-management button:hover{border-color:#8979d3;color:#e5ddff}
+.frameforge-workspace .check-setting{display:flex;align-items:center;gap:8px;color:#b6bdc9;font-size:10px}
+.frameforge-workspace .check-setting input{accent-color:#9b89ef}
+.frameforge-workspace .export-wide{width:100%;margin-top:7px}
+.frameforge-workspace .crop-ratios{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.frameforge-workspace .crop-ratios button{border:1px solid #343b49;border-radius:6px;background:#191d27;color:#abb4c2;padding:8px 2px;font-size:9px}
+.frameforge-workspace .crop-ratios button:hover{border-color:#9383e1;color:#eee8ff}
+.frameforge-workspace .studio-properties .panel-divider{height:1px;background:#292e39}
+.frameforge-workspace .video-preview-stage{position:relative;width:min(860px,calc(100% - 55px));aspect-ratio:16/9;max-height:calc(100% - 42px);background:#05060a;border:1px solid #323745;border-radius:9px;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 20px 70px #0009}
+.frameforge-workspace .video-preview-stage>video{width:100%;height:100%;object-fit:contain}
+.frameforge-workspace .video-preview-controls{position:absolute;left:0;right:0;bottom:0;height:43px;background:#090b11df;display:flex;align-items:center;gap:10px;padding:0 11px;color:#d0d4dc;font:10px 'DM Mono',monospace}
+.frameforge-workspace .video-preview-controls input{flex:1;min-width:20px;accent-color:#9b89ef}
+.frameforge-workspace .video-title-overlay{position:absolute;left:7%;right:7%;text-align:center;font-weight:800;line-height:1.15;text-shadow:0 2px 8px #000,0 0 2px #000;pointer-events:none;overflow-wrap:anywhere}
+.frameforge-workspace .title-top{top:12%}
+.frameforge-workspace .title-center{top:50%;transform:translateY(-50%)}
+.frameforge-workspace .title-bottom{bottom:16%}
+.frameforge-workspace .video-frame-overlay{position:absolute;inset:0;pointer-events:none}
+.frameforge-workspace .frame-classic{border:12px solid #f4f0e8}
+.frameforge-workspace .frame-neon{border:5px solid #b6a5ff;box-shadow:inset 0 0 22px #b6a5ff,0 0 16px #b6a5ff}
+.frameforge-workspace .frame-film{border-top:20px solid #111018;border-bottom:20px solid #111018}
+.frameforge-workspace .video-timeline-panel{height:205px;flex:none;border-top:1px solid #292e39;background:#11141b;padding:11px 13px;overflow:auto}
+.frameforge-workspace .video-timeline-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.frameforge-workspace .video-timeline-heading strong{font-size:10px;letter-spacing:1px;color:#d6d9e1}
+.frameforge-workspace .video-timeline-heading small{display:block;color:#7a8493;font-size:9px;margin-top:3px}
+.frameforge-workspace .timeline-add-actions{display:flex;gap:6px}
+.frameforge-workspace .timeline-add-actions button{border:1px solid #353b49;border-radius:6px;background:#1a1e29;color:#b6bdc9;display:flex;align-items:center;gap:4px;padding:6px 8px;font-size:9px}
+.frameforge-workspace .video-track-row{display:grid;grid-template-columns:56px minmax(0,1fr);gap:7px;align-items:center;min-height:42px;border-bottom:1px solid #272d37}
+.frameforge-workspace .video-track-label{display:flex;align-items:center;gap:5px;color:#9ca5b4;font:9px 'DM Mono',monospace}
+.frameforge-workspace .video-track-label svg{color:#a99af3}
+.frameforge-workspace .video-track-content{min-width:0;display:flex;gap:5px;align-items:stretch;min-height:33px}
+.frameforge-workspace .video-timeline-clip{min-width:80px;position:relative;display:flex;align-items:center;gap:6px;padding:3px 6px;background:linear-gradient(90deg,#3d3569,#28253d);border:1px solid #62569a;border-radius:5px;color:#e8e2ff;cursor:pointer;overflow:hidden}
+.frameforge-workspace .video-timeline-clip.active{border-color:#b6a5ff;box-shadow:0 0 0 1px #9b89ef55}
+.frameforge-workspace .clip-thumb{width:24px;height:24px;flex:none;background:#28243d;border-radius:4px;display:grid;place-items:center}
+.frameforge-workspace .clip-meta{min-width:0;display:flex;flex-direction:column;gap:3px}
+.frameforge-workspace .clip-meta b{font-size:9px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.frameforge-workspace .clip-meta small{font:8px 'DM Mono',monospace;color:#b6adce;white-space:nowrap}
+.frameforge-workspace .clip-actions{display:flex;align-items:center;margin-left:auto}
+.frameforge-workspace .clip-actions button{width:18px;height:20px;border:0;background:transparent;color:#c8c1db;display:grid;place-items:center}
+.frameforge-workspace .clip-actions button:disabled{opacity:.2}
+.frameforge-workspace .transition-tag{font:7px 'DM Mono',monospace;color:#d8caff;background:#5b4b83;padding:3px;border-radius:3px}
+.frameforge-workspace .title-track,.frameforge-workspace .audio-track-content{background:#171b24;border:1px solid #2c3240;border-radius:5px;min-height:29px}
+.frameforge-workspace .title-clip{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;border:1px solid #7465bc;border-radius:4px;background:#383158;color:#e9e2ff;padding:5px 8px;text-align:left;font-size:9px}
+.frameforge-workspace .title-clip small{font:8px 'DM Mono',monospace;color:#c7b9ff}
+.frameforge-workspace .audio-clip{display:flex;align-items:center;gap:8px;width:100%;padding:4px 8px;background:#244b42;color:#d7fae9;border-radius:4px;font-size:9px}
+.frameforge-workspace .audio-clip span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frameforge-workspace .audio-clip button{border:0;background:transparent;color:#d7fae9}
+.frameforge-workspace .active-clip-heading{display:flex;align-items:center;gap:8px;padding:9px;background:#1b202b;border:1px solid #303745;border-radius:7px;color:#c4cbd5;font-size:10px}
+.frameforge-workspace .active-clip-heading span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frameforge-workspace .effects-heading{margin-top:9px}
+.frameforge-workspace .effect-slider{margin-top:8px}
+.frameforge-workspace .audio-player{width:100%;height:34px}
+.frameforge-workspace .danger-action{border:1px solid #72414c;background:#321e27;color:#f1b5c0;border-radius:6px;padding:8px;font-size:10px}
+.frameforge-workspace .export-progress{padding:10px;border:1px solid #363c4a;border-radius:7px;background:#191e28}
+.frameforge-workspace .export-progress>div:first-child{display:flex;justify-content:space-between;color:#b9c0cc;font-size:10px;margin-bottom:8px}
+.frameforge-workspace .export-progress b{color:#c7b7ff}
+.frameforge-workspace .progress-track{height:5px;border-radius:8px;background:#303542;overflow:hidden}
+.frameforge-workspace .progress-track i{height:100%;display:block;background:#9381e6;transition:width .2s}
+.frameforge-workspace .spinner{width:13px;height:13px;border:2px solid #ffffff55;border-top-color:white;border-radius:50%;animation:frameforge-spin .8s linear infinite}
+@keyframes frameforge-spin{to{transform:rotate(360deg)}}
+.app-statusbar{height:27px;flex:none;display:flex;align-items:center;gap:8px;padding:0 14px;background:#0d1017;border-top:1px solid #292e39;color:#8f98a7;font:9px 'DM Mono',monospace}
+.status-live{width:6px;height:6px;border-radius:50%;background:#75c99d}
+.statusbar-right{margin-left:auto;display:flex;align-items:center;gap:6px;color:#777f8e}
+.studio-edition{display:flex;align-items:center;gap:5px;color:#aca1d8;font-size:9px;letter-spacing:.2px}
+.modal-card h3{display:flex;align-items:center;gap:7px;color:#dcd7f6;font-size:12px;margin:17px 0 6px}
+.modal-card h3 svg{color:#a99af3}
+@media(max-width:1160px){
+  .frameforge-workspace .studio-grid{grid-template-columns:62px minmax(0,1fr) 286px}
+  .frameforge-workspace .studio-properties{padding:12px 10px 24px}
+  .frameforge-workspace .editor-canvas{max-width:calc(100vw - 400px)}
+}
+@media(max-width:820px){
+  .frameforge-workspace{height:auto;min-height:calc(100vh - 115px);overflow:visible}
+  .frameforge-workspace .studio-grid{height:auto;min-height:700px;grid-template-columns:55px minmax(0,1fr)}
+  .frameforge-workspace .studio-toolbar{grid-row:1 / span 2}
+  .frameforge-workspace .studio-main{min-height:680px}
+  .frameforge-workspace .studio-properties{grid-column:2;border-left:0;border-top:1px solid #292e39;max-height:none}
+  .frameforge-workspace .studio-canvas-area{min-height:320px}
+  .frameforge-workspace .editor-canvas{max-width:calc(100vw - 90px);max-height:calc(100vh - 500px)}
+  .frameforge-workspace .video-preview-stage{width:calc(100% - 20px)}
+  .frameforge-workspace .video-timeline-panel{height:195px}
+  .frameforge-shell .topbar{flex-wrap:wrap;gap:10px;padding:10px}
+  .frameforge-shell .brand{min-width:auto}
+  .frameforge-shell .mode-switch{order:3}
+  .frameforge-shell .local-state{display:none}
+  .studio-edition{display:none}
+}
+@media(max-width:520px){
+  .frameforge-shell .topbar{gap:7px}
+  .frameforge-shell .brand-copy strong{font-size:10px}
+  .frameforge-shell .brand-copy small{font-size:8px}
+  .frameforge-shell .mode{padding:7px 9px;font-size:10px}
+  .frameforge-workspace .studio-toolbar button{width:46px}
+  .frameforge-workspace .studio-toolbar button span{font-size:8px}
+  .frameforge-workspace .studio-toolbar-row{padding:0 7px}
+  .frameforge-workspace .studio-actions{gap:0}
+  .frameforge-workspace .mini-tool{min-width:24px;padding:0 3px}
+  .frameforge-workspace .zoom-readout{min-width:38px;font-size:8px}
+  .frameforge-workspace .video-track-row{grid-template-columns:48px minmax(0,1fr)}
+  .frameforge-workspace .clip-actions button{width:15px}
+  .frameforge-workspace .property-tabs button{font-size:8px}
+}
