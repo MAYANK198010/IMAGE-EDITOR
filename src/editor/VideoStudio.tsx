@@ -179,6 +179,8 @@ export default function VideoStudio({ onStatus }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const outputInFlight = useRef(false);
+  const pendingSeekRef = useRef<{ clipId: string; time: number } | null>(null);
+  const allocatedUrlsRef = useRef(new Set<string>());
 
   const activeIndex = clips.findIndex((clip) => clip.id === activeClipId);
   const activeClip = activeIndex >= 0 ? clips[activeIndex] : clips[0];
@@ -198,8 +200,11 @@ export default function VideoStudio({ onStatus }: Props) {
     const element = videoRef.current;
     if (!element) return;
     const seekTo = () => {
-      const target = clamp(activeClip.trimStart, 0, Math.max(0, element.duration || activeClip.duration));
+      const pending = pendingSeekRef.current?.clipId === activeClip.id ? pendingSeekRef.current.time : activeClip.trimStart;
+      const target = clamp(pending, 0, Math.max(0, element.duration || activeClip.duration));
       if (Math.abs(element.currentTime - target) > 0.04) element.currentTime = target;
+      setLocalTime(target);
+      pendingSeekRef.current = null;
       if (isPlaying) void element.play().catch(() => {
         setIsPlaying(false);
         onStatus("Playback was blocked. Press Play again.");
@@ -223,11 +228,11 @@ export default function VideoStudio({ onStatus }: Props) {
     } else {
       audio.pause();
     }
-  }, [isPlaying, activeClipId, audioAsset?.id, onStatus]);
+  }, [isPlaying, activeClipId, audioAsset?.id, audioAsset?.duration, globalPlayhead, onStatus]);
 
   useEffect(() => () => {
-    clips.forEach((clip) => URL.revokeObjectURL(clip.url));
-    if (audioAsset) URL.revokeObjectURL(audioAsset.url);
+    allocatedUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    allocatedUrlsRef.current.clear();
   }, []);
 
   const appendVideoFiles = async (files: FileList | File[]) => {
@@ -238,6 +243,7 @@ export default function VideoStudio({ onStatus }: Props) {
     }
     const prepared = await Promise.all(chosen.map(async (file): Promise<VideoClip | null> => {
       const url = URL.createObjectURL(file);
+      allocatedUrlsRef.current.add(url);
       try {
         const metadata = await new Promise<number>((resolve, reject) => {
           const probe = document.createElement("video");
@@ -269,17 +275,15 @@ export default function VideoStudio({ onStatus }: Props) {
         };
       } catch {
         URL.revokeObjectURL(url);
+        allocatedUrlsRef.current.delete(url);
         onStatus(`Could not read video: ${file.name}`);
         return null;
       }
     }));
     const valid = prepared.filter((clip): clip is VideoClip => clip !== null);
     if (!valid.length) return;
-    setClips((current) => {
-      const next = [...current, ...valid];
-      setActiveClipId((old) => old ?? valid[0].id);
-      return next;
-    });
+    if (!activeClipId && clips.length === 0) setActiveClipId(valid[0].id);
+    setClips((current) => [...current, ...valid]);
     setVideoTab("clips");
     onStatus(`${valid.length} video clip${valid.length === 1 ? "" : "s"} added to the timeline`);
   };
@@ -291,6 +295,7 @@ export default function VideoStudio({ onStatus }: Props) {
       return;
     }
     const url = URL.createObjectURL(file);
+    allocatedUrlsRef.current.add(url);
     try {
       const duration = await new Promise<number>((resolve, reject) => {
         const probe = document.createElement("audio");
@@ -299,12 +304,16 @@ export default function VideoStudio({ onStatus }: Props) {
         probe.onerror = () => reject(new Error("Audio metadata unavailable"));
         probe.src = url;
       });
-      if (audioAsset) URL.revokeObjectURL(audioAsset.url);
+      if (audioAsset) {
+        URL.revokeObjectURL(audioAsset.url);
+        allocatedUrlsRef.current.delete(audioAsset.url);
+      }
       setAudioAsset({ id: makeId(), file, url, name: file.name, duration, volume: 0.8 });
       setVideoTab("audio");
       onStatus("Music track added");
     } catch {
       URL.revokeObjectURL(url);
+      allocatedUrlsRef.current.delete(url);
       onStatus("Could not read that audio file.");
     }
   };
@@ -316,6 +325,7 @@ export default function VideoStudio({ onStatus }: Props) {
   const selectClip = (clip: VideoClip) => {
     if (videoRef.current) videoRef.current.pause();
     setIsPlaying(false);
+    pendingSeekRef.current = { clipId: clip.id, time: clip.trimStart };
     setActiveClipId(clip.id);
     setLocalTime(clip.trimStart);
   };
@@ -349,6 +359,7 @@ export default function VideoStudio({ onStatus }: Props) {
   const advanceToNextClip = () => {
     if (activeIndex >= 0 && activeIndex < clips.length - 1) {
       const next = clips[activeIndex + 1];
+      pendingSeekRef.current = { clipId: next.id, time: next.trimStart };
       setActiveClipId(next.id);
       setLocalTime(next.trimStart);
     } else {
@@ -381,14 +392,20 @@ export default function VideoStudio({ onStatus }: Props) {
     });
     const index = targetIndex < 0 ? clips.length - 1 : targetIndex;
     const clip = clips[index];
-    const local = clip.trimStart + Math.min(getClipLength(clip), Math.max(0, safe - clipStarts[index])) * clip.speed;
+    const local = clamp(
+      clip.trimStart + Math.min(getClipLength(clip), Math.max(0, safe - clipStarts[index])) * clip.speed,
+      clip.trimStart,
+      clip.trimEnd,
+    );
     if (videoRef.current) videoRef.current.pause();
     setIsPlaying(false);
+    if (activeClip?.id === clip.id && videoRef.current) {
+      videoRef.current.currentTime = local;
+    } else {
+      pendingSeekRef.current = { clipId: clip.id, time: local };
+    }
     setActiveClipId(clip.id);
-    setLocalTime(clamp(local, clip.trimStart, clip.trimEnd));
-    requestAnimationFrame(() => {
-      if (videoRef.current) videoRef.current.currentTime = clamp(local, clip.trimStart, clip.trimEnd);
-    });
+    setLocalTime(local);
   };
 
   const splitClip = () => {
@@ -399,6 +416,7 @@ export default function VideoStudio({ onStatus }: Props) {
     const first: VideoClip = { ...activeClip, id: makeId(), trimEnd: localTime };
     const second: VideoClip = { ...activeClip, id: makeId(), trimStart: localTime, transition: "fade" };
     setClips((current) => [...current.slice(0, activeIndex), first, second, ...current.slice(activeIndex + 1)]);
+    pendingSeekRef.current = { clipId: second.id, time: localTime };
     setActiveClipId(second.id);
     setIsPlaying(false);
     setLocalTime(localTime);
@@ -418,12 +436,24 @@ export default function VideoStudio({ onStatus }: Props) {
   const deleteClip = (id: string) => {
     const index = clips.findIndex((clip) => clip.id === id);
     if (index < 0) return;
+    const removedClip = clips[index];
     const nextClips = clips.filter((clip) => clip.id !== id);
     setClips(nextClips);
+    if (!nextClips.some((clip) => clip.url === removedClip.url)) {
+      URL.revokeObjectURL(removedClip.url);
+      allocatedUrlsRef.current.delete(removedClip.url);
+    }
     const newActive = nextClips[Math.min(index, nextClips.length - 1)];
     setActiveClipId(newActive?.id ?? null);
     setIsPlaying(false);
     onStatus("Clip removed from timeline");
+  };
+
+  const removeAudioTrack = () => {
+    if (!audioAsset) return;
+    URL.revokeObjectURL(audioAsset.url);
+    allocatedUrlsRef.current.delete(audioAsset.url);
+    setAudioAsset(null);
   };
 
   const duplicateClip = (clip: VideoClip) => {
@@ -753,7 +783,13 @@ export default function VideoStudio({ onStatus }: Props) {
                   onLoadedMetadata={() => {
                     const video = videoRef.current;
                     if (!video || !activeClip) return;
-                    video.currentTime = clamp(activeClip.trimStart, 0, activeClip.duration);
+                    const requestedTime = pendingSeekRef.current?.clipId === activeClip.id
+                      ? pendingSeekRef.current.time
+                      : activeClip.trimStart;
+                    const targetTime = clamp(requestedTime, 0, activeClip.duration);
+                    video.currentTime = targetTime;
+                    setLocalTime(targetTime);
+                    pendingSeekRef.current = null;
                     video.playbackRate = activeClip.speed;
                     video.volume = activeClip.muted ? 0 : activeClip.volume;
                     if (isPlaying) void video.play().catch(() => setIsPlaying(false));
@@ -824,7 +860,7 @@ export default function VideoStudio({ onStatus }: Props) {
           <div className="video-track-row">
             <div className="video-track-label"><AudioLines size={14}/> AUDIO</div>
             <div className="video-track-content audio-track-content">
-              {audioAsset ? <div className="audio-clip"><AudioLines size={13}/><span>{audioAsset.name}</span><button onClick={() => { URL.revokeObjectURL(audioAsset.url); setAudioAsset(null); }} title="Remove music"><X size={12}/></button></div> : <span className="empty-track-label">Add music or voice audio</span>}
+              {audioAsset ? <div className="audio-clip"><AudioLines size={13}/><span>{audioAsset.name}</span><button onClick={removeAudioTrack} title="Remove music"><X size={12}/></button></div> : <span className="empty-track-label">Add music or voice audio</span>}
             </div>
           </div>
         </div>
@@ -883,7 +919,7 @@ export default function VideoStudio({ onStatus }: Props) {
                 <p className="empty-hint">This music track starts at the beginning of the edited sequence.</p>
                 <audio ref={audioRef} src={audioAsset.url} controls className="audio-player"/>
                 <label className="range-control"><span><b>Music volume</b><output>{Math.round(audioAsset.volume * 100)}%</output></span><input type="range" min="0" max="1" step="0.01" value={audioAsset.volume} onChange={(event) => setAudioAsset((current) => current ? { ...current, volume: Number(event.target.value) } : current)}/></label>
-                <button className="danger-action" onClick={() => { URL.revokeObjectURL(audioAsset.url); setAudioAsset(null); }}>Remove audio track</button>
+                <button className="danger-action" onClick={removeAudioTrack}>Remove audio track</button>
               </>
             ) : (
               <>
