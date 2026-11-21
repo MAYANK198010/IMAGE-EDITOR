@@ -1,69 +1,73 @@
 # IMAGE-EDITOR — FrameForge
 
-A browser-based editor for still images and short-form video clips. The project is local-first: imported media is processed in the browser and is not uploaded to a server by this initial implementation.
+FrameForge is a local-first browser editor for still images and short-form video sequences. Imported files are processed in the browser; this version does not upload user media to an application server.
 
-## Implemented now
+## Image Studio — available tools
 
-### Image Studio
-- Import local images through the browser file picker or drag-and-drop.
-- Adjust brightness, contrast, saturation, blur, grayscale, sepia, hue and invert.
-- Apply eight built-in filter presets.
-- Crop using Original, Free, 1:1, 4:5, 16:9 and 9:16 ratios, then refine crop size and position with sliders.
-- Rotate and flip the image.
-- Add one styled text overlay with editable text, colour, size and vertical position.
-- Compare the edit with the original using the press-and-hold preview control.
-- Undo and redo image edits.
-- Export flattened PNG or JPEG, with a JPEG quality setting.
+- Import a base image and add additional image overlays.
+- Real editable layers for text, shapes, frames and image overlays.
+- Select layers from the layer panel or by clicking the canvas; drag to position and resize using the lower-right handle.
+- Show/hide, lock/unlock, duplicate, delete, reorder and select layers.
+- Change layer opacity, rotation and blend mode (Normal, Multiply, Screen, Overlay, Lighten, Darken).
+- Text controls: content, colour, font family, size, weight, alignment, italic, shadow and outline.
+- Shape tools: rectangle, ellipse, line and star, with fill and stroke settings.
+- Frame styles: classic, double, polaroid, film strip and neon.
+- Adjustments: brightness, contrast, saturation, blur, grayscale, sepia, hue, invert, vignette and grain.
+- Nine presets: Original, Mono, Warm, Cool, Fade, Punch, Vintage, Dream and Negative.
+- Crop presets: Original, Free, 1:1, 4:5, 16:9 and 9:16; refine crop dimensions and position with sliders.
+- Rotate, flip, undo/redo and hold-to-compare with the original.
+- Export flattened PNG, JPEG or WebP at original size, 1920px, 2560px or 3840px long edge. JPEG/WebP quality is adjustable.
 
-### Video Studio
-- Import and preview one local video clip.
-- Seek through the source video and set start/end trim points.
-- Adjust playback speed and original clip volume.
-- Record the selected range to a supported MediaRecorder format (typically WebM; MP4 only when the browser exposes a compatible recorder MIME type).
+The crop UI currently uses presets and numeric sliders; it does not yet have a draggable crop marquee. Layer masks, smart selections, brush retouching, healing, liquify and AI object removal are not implemented.
 
-## Current limitations
+## Video Studio — available tools
 
-This is an early browser editor, not yet a full Photoshop, Premiere, Canva or CapCut replacement.
+- Import multiple local clips into a sequential timeline.
+- Preview, seek, trim in/out, split at the playhead, reorder, duplicate and delete clips.
+- Change clip playback speed, volume and mute state.
+- Apply per-clip brightness, contrast, saturation, blur, sepia, grayscale and hue effects.
+- Choose Cut or Fade-in-from-black transitions.
+- Add one timed title overlay and select its text, colour, size, vertical position and duration.
+- Import one music/voice audio file, preview it in sync with the timeline and adjust its volume. Export mixes the original clip sound with the imported audio.
+- Apply Classic, Film or Neon output-frame treatment.
+- Export MP4 or WebM using Mediabunny and browser WebCodecs, with codec capability checks, 720p/1080p/4K target resolutions, 16:9/9:16/1:1/4:5/source framing, and 24/25/30/60 FPS options.
+- Show export progress and save directly to disk where the browser supports the File System Access API.
 
-- Image editing currently exports a flattened canvas; multiple selectable layers, masks, blend modes, object selection, retouch brushes and draggable text are not implemented.
-- Crop is controlled through ratio and numeric sliders; an interactive crop marquee/handles are not yet implemented.
-- Video editing is a single-source clip trimmer. Multiple tracks, multiple clips, split/ripple editing, transitions, keyframes, speed curves, text/caption tracks, colour effects, chroma key, stabilisation, motion tracking and audio mixing are not implemented.
-- Video export relies on browser media capture and recorder support. Output format and codec availability vary by browser. There is no full MP4/WebM container pipeline yet.
-- AI background removal, generative fill, object removal, transcript editing and cloud rendering are not implemented.
+The video timeline is currently a sequential clip editor, not a professional overlapping multi-track compositor. Multiple overlay/video tracks, multiple audio tracks, audio waveforms, keyframe animation, speed curves, cross-clip transitions, captions/subtitles, chroma key, stabilization, motion tracking and AI editing are not implemented. Export depends on the browser's available decoders, encoders and memory; a 4K preset is not a guarantee that every device can encode every source file.
 
 ## Technology
 
-- React 19 + TypeScript + Vite
-- Canvas 2D API for image composition, transforms, adjustments and raster export
-- HTMLVideoElement for video preview and seeking
-- MediaRecorder + media-element capture where supported for basic video recording
+- React 19, TypeScript 7 and Vite 8
+- Canvas 2D for image composition and export
+- HTML video/audio elements for the interactive editor preview
+- Mediabunny 1.66 for media demuxing, encoding, container writing and streaming export
+- WebCodecs where supported by the browser
 - Lucide React icons
-
-The next architecture milestone is to formalise the image document/layer model and build a real multi-track video timeline. For robust video export, evaluate WebCodecs together with a container demuxer/muxer; WebCodecs alone does not create finished MP4/WebM files. FFmpeg.wasm should remain an optional fallback because browser-side transcoding can be CPU- and memory-intensive.
 
 ## Run locally
 
-Requires a current Node.js release compatible with the engine declared in `package.json`. The committed `package-lock.json` pins the dependency tree; use `npm ci` for clean, reproducible installs.
+Requires Node.js compatible with the engine version in `package.json`. The committed `package-lock.json` pins the dependency tree.
 
 ```bash
 npm ci
 npm run dev
-npm run build
 npm run typecheck
+npm run build
 ```
 
-## Research and roadmap
+## Build and deployment
 
-See [docs/FEATURE-MATRIX.md](docs/FEATURE-MATRIX.md) for the competitor feature benchmark, full feature inventory, implementation status, architecture direction and delivery priorities.
+GitHub Actions runs TypeScript checks and a production Vite build on pushes to `main`. The Pages workflow builds `dist/` and deploys that Vite output (not a Jekyll source directory).
+
+- [Open FrameForge](https://mayank198010.github.io/IMAGE-EDITOR/)
+- [Feature matrix and competitor research](docs/FEATURE-MATRIX.md)
+- [GitHub Actions](https://github.com/MAYANK198010/IMAGE-EDITOR/actions)
 
 ## Technical references
 
 - [Canvas 2D API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
-- [MediaRecorder](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder)
-- [HTMLMediaElement.captureStream()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/captureStream)
 - [WebCodecs API](https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API)
-- [Mediabunny](https://mediabunny.dev/guide/introduction)
-- [FFmpeg.wasm overview](https://ffmpegwasm.netlify.app/docs/overview/)
+- [Mediabunny: writing media files](https://mediabunny.dev/guide/writing-media-files)
+- [Mediabunny: media sources and backpressure](https://mediabunny.dev/guide/media-sources)
 - [Photopea layers](https://www.photopea.com/learn/layers)
 - [Photopea adjustments and filters](https://www.photopea.com/learn/adjustments-filters)
-
