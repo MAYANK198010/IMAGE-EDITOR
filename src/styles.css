@@ -117,3 +117,25 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .help-card p b{color:#f0eff6}
 @media(max-width:1050px){.workspace{grid-template-columns:62px minmax(350px,1fr) 250px}.topbar{padding:0 13px;gap:15px}.brand{min-width:180px}.properties-panel{padding:17px 12px}}
 @media(max-width:780px){.topbar{height:auto;min-height:64px;flex-wrap:wrap;padding:10px;gap:10px}.brand{min-width:auto}.brand-copy strong{font-size:10px}.brand-copy small{font-size:8px}.mode-switch{order:3}.top-actions{gap:4px}.local-state,.quiet-button{display:none}.workspace{height:auto;min-height:calc(100vh - 64px);grid-template-columns:54px minmax(0,1fr)}.properties-panel{grid-column:2;border-left:0;border-top:1px solid #292d38;max-height:none}.editor-column{min-height:620px}.timeline-panel{height:175px}.canvas-area{min-height:330px}.preset-swatch{height:66px;width:62px}.preset-card{min-width:62px}.image-preview canvas{max-width:calc(100vw - 90px);max-height:calc(100vh - 390px)}.video-stage{width:calc(100% - 25px)}}
+
+
+/* Expanded image editing controls */
+.panel-tabs{display:flex;gap:5px;padding:4px;border:1px solid #2a2f3a;border-radius:9px;background:#0c0f16;margin-bottom:20px}
+.panel-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:6px;padding:9px 8px;background:transparent;color:#858e9d;font-size:10px}
+.panel-tab.active{background:#262438;color:#e1d9ff;box-shadow:inset 0 0 0 1px #4b4367}
+.crop-ratios{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.ratio-button{border:1px solid #333947;border-radius:6px;background:#191d27;color:#aeb5c2;padding:9px 5px;font-size:10px}
+.ratio-button.active{border-color:#9b89ef;background:#29243c;color:#e4ddff}
+.crop-slider{margin-top:18px}
+.export-setting{display:flex;align-items:center;justify-content:space-between;margin:12px 0;color:#aeb5c2;font-size:10px}
+.export-setting select{min-width:110px;background:#191d27;border:1px solid #343b49;border-radius:6px;color:#e3e6ec;padding:8px;font-size:10px}
+.export-quality{margin:15px 0 5px}
+.modal-range{margin:17px 0}
+.modal-field input[type="color"]{height:38px;width:64px;padding:3px;background:#0d1017;border:1px solid #343b49;border-radius:7px}
+.modal-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:17px}
+.quiet-button:disabled{opacity:.35;cursor:not-allowed}
+@media(max-width:780px){
+  .panel-tabs{margin-bottom:15px}
+  .crop-ratios{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .modal-actions{flex-wrap:wrap}
+}
