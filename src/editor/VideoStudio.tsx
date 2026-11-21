@@ -714,8 +714,6 @@ export default function VideoStudio({ onStatus, active }: Props) {
           sample.close();
           setProgress(clamp((globalTime / timelineTotal) * 82, 0, 82));
         }
-        timelineCursor += clipDuration;
-
         if (audioSource) {
           const audioTrack = await input.getPrimaryAudioTrack();
           let audioCursor = 0;
@@ -759,6 +757,7 @@ export default function VideoStudio({ onStatus, active }: Props) {
             ));
           }
         }
+        timelineCursor += clipDuration;
         setProgress(clamp((timelineCursor / timelineTotal) * 82, 0, 82));
       }
       videoSource.close();
