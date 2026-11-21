@@ -78,19 +78,19 @@ function formatTime(value: number): string {
   if (!Number.isFinite(value) || value < 0) return "00:00";
   const minutes = Math.floor(value / 60);
   const seconds = Math.floor(value % 60);
-  return \`\${String(minutes).padStart(2, "0")}:\${String(seconds).padStart(2, "0")}\`;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
 function getFilterCss(adjustments: Adjustments): string {
   return [
-    \`brightness(\${adjustments.brightness}%)\`,
-    \`contrast(\${adjustments.contrast}%)\`,
-    \`saturate(\${adjustments.saturation}%)\`,
-    \`blur(\${adjustments.blur}px)\`,
-    \`grayscale(\${adjustments.grayscale}%)\`,
-    \`sepia(\${adjustments.sepia}%)\`,
-    \`hue-rotate(\${adjustments.hue}deg)\`,
-    \`invert(\${adjustments.invert}%)\`,
+    `brightness(${adjustments.brightness}%)`,
+    `contrast(${adjustments.contrast}%)`,
+    `saturate(${adjustments.saturation}%)`,
+    `blur(${adjustments.blur}px)`,
+    `grayscale(${adjustments.grayscale}%)`,
+    `sepia(${adjustments.sepia}%)`,
+    `hue-rotate(${adjustments.hue}deg)`,
+    `invert(${adjustments.invert}%)`,
   ].join(" ");
 }
 
@@ -259,7 +259,7 @@ export default function App() {
     if (!showOriginal && edit.textEnabled && edit.text.trim()) {
       context.save();
       const fontSize = Math.max(12, Math.round(cropWidth * edit.textSize / 100));
-      context.font = \`700 \${fontSize}px Arial, sans-serif\`;
+      context.font = `700 ${fontSize}px Arial, sans-serif`;
       context.textAlign = "center";
       context.textBaseline = "middle";
       context.lineJoin = "round";
@@ -337,7 +337,7 @@ export default function App() {
       },
       cropRatio: ratio,
     }));
-    setStatus(\`Crop ratio set to \${ratio}\`);
+    setStatus(`Crop ratio set to ${ratio}`);
   };
 
   const updateCrop = (key: keyof CropRect, value: number) => {
@@ -393,10 +393,10 @@ export default function App() {
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = \`\${imageName.replace(/\.[^.]+$/, "")}-edited.\${mimeType === "image/png" ? "png" : "jpg"}\`;
+      anchor.download = `${imageName.replace(/\.[^.]+$/, "")}-edited.${mimeType === "image/png" ? "png" : "jpg"}`;
       anchor.click();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setStatus(\`\${mimeType === "image/png" ? "PNG" : "JPEG"} export created\`);
+      setStatus(`${mimeType === "image/png" ? "PNG" : "JPEG"} export created`);
     }, mimeType, mimeType === "image/jpeg" ? jpegQuality / 100 : undefined);
   };
 
@@ -499,10 +499,10 @@ export default function App() {
           const anchor = document.createElement("a");
           anchor.href = downloadUrl;
           const extension = type.includes("mp4") ? "mp4" : "webm";
-          anchor.download = \`\${videoName.replace(/\.[^.]+$/, "")}-edited.\${extension}\`;
+          anchor.download = `${videoName.replace(/\.[^.]+$/, "")}-edited.${extension}`;
           anchor.click();
           window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1500);
-          setStatus(\`\${extension.toUpperCase()} export created. Review playback before publishing.\`);
+          setStatus(`${extension.toUpperCase()} export created. Review playback before publishing.`);
         } else {
           setStatus("The browser returned an empty export.");
         }
@@ -659,7 +659,7 @@ export default function App() {
           >
             {mode === "image" ? (
               imageElement ? (
-                <div className="image-preview" style={{ transform: \`scale(\${zoom})\` }}>
+                <div className="image-preview" style={{ transform: `scale(${zoom})` }}>
                   <canvas ref={canvasRef} aria-label="Edited image preview" />
                 </div>
               ) : (
@@ -711,7 +711,7 @@ export default function App() {
             )}
             <div className="canvas-footer">
               <span>{status}</span>
-              <span>{mode === "image" && canvasSize.width ? \`\${canvasRef.current?.width ?? canvasSize.width} × \${canvasRef.current?.height ?? canvasSize.height} px\` : mode === "video" && videoDuration ? \`\${videoDuration.toFixed(1)} sec\` : "Workspace"}</span>
+              <span>{mode === "image" && canvasSize.width ? `${canvasRef.current?.width ?? canvasSize.width} × ${canvasRef.current?.height ?? canvasSize.height} px` : mode === "video" && videoDuration ? `${videoDuration.toFixed(1)} sec` : "Workspace"}</span>
             </div>
           </div>
 
@@ -724,7 +724,7 @@ export default function App() {
               <div className="preset-strip">
                 {PRESETS.map((preset) => (
                   <button className="preset-card" key={preset.name} onClick={() => applyPreset(preset.values)} disabled={!imageElement}>
-                    <span className={\`preset-swatch \${preset.className}\`}>{imageUrl && <img src={imageUrl} alt="" />}</span>
+                    <span className={`preset-swatch ${preset.className}`}>{imageUrl && <img src={imageUrl} alt="" />}</span>
                     <small>{preset.name}</small>
                   </button>
                 ))}
@@ -735,7 +735,7 @@ export default function App() {
                 <div className="timeline-track">
                   <span className="track-label"><Video size={13} /> VIDEO</span>
                   <div className="track-bar">
-                    {videoUrl ? <div className="video-clip" style={{ left: \`\${videoDuration ? (trimStart / videoDuration) * 100 : 0}%\`, width: \`\${videoDuration ? ((trimEnd - trimStart) / videoDuration) * 100 : 100}%\` }}><Film size={13} /><span>{videoName}</span></div> : <span className="empty-track-label">Import a video clip to begin</span>}
+                    {videoUrl ? <div className="video-clip" style={{ left: `${videoDuration ? (trimStart / videoDuration) * 100 : 0}%`, width: `${videoDuration ? ((trimEnd - trimStart) / videoDuration) * 100 : 100}%` }}><Film size={13} /><span>{videoName}</span></div> : <span className="empty-track-label">Import a video clip to begin</span>}
                   </div>
                 </div>
                 <div className="timeline-track audio-track">
