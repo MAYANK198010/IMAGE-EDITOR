@@ -57,11 +57,12 @@ export default function App() {
       </header>
 
       <main className="workspace frameforge-workspace">
-        {mode === "image" ? (
+        <div className="editor-view" hidden={mode !== "image"}>
           <ImageStudio onStatus={reportStatus} />
-        ) : (
-          <VideoStudio onStatus={reportStatus} />
-        )}
+        </div>
+        <div className="editor-view" hidden={mode !== "video"}>
+          <VideoStudio active={mode === "video"} onStatus={reportStatus} />
+        </div>
       </main>
 
       <footer className="app-statusbar">
