@@ -6,7 +6,7 @@ import {
   Copy, Crop, Square, Frame, Undo2, Redo2,
   Maximize2, ZoomIn, ZoomOut, Upload, WandSparkles,
 } from "lucide-react";
-import type { AdjustmentState, EditableLayer, ImageEditDocument, TextLayer, ShapeLayer, FrameLayer } from "./types";
+import type { AdjustmentState, EditableLayer, ImageEditDocument, ShapeLayer, FrameLayer } from "./types";
 import {
   DEFAULT_ADJUSTMENTS, FILTER_PRESETS, FULL_CROP, clamp, createFrameLayer,
   createImageLayer, createShapeLayer, createTextLayer, hitTestLayer, makeId,
