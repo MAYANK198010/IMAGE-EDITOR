@@ -23,6 +23,8 @@ The crop UI currently uses presets and numeric sliders; it does not yet have a d
 ## Video Studio — available tools
 
 - Import multiple local clips into a sequential timeline.
+- Save, rename, autosave and reopen video projects locally using IndexedDB; imported media is stored with the project and can be restored in the same browser profile.
+- Store edit data in a versioned project document with independent video, text and audio track records, source-time ranges, effects, and keyframe-ready timeline items.
 - Preview, seek, trim in/out, split at the playhead, reorder, duplicate and delete clips.
 - Change clip playback speed, volume and mute state.
 - Apply per-clip brightness, contrast, saturation, blur, sepia, grayscale and hue effects.

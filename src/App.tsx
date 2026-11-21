@@ -84,7 +84,7 @@ export default function App() {
             <h3><ImageIcon size={15}/> Image Studio</h3>
             <p>Import a base image, add independent layers, select and drag them on the canvas, resize them with the corner handle, reorder and hide layers, then adjust text, shape, frame, opacity and blend settings. Effects, crop controls and 4K still-image export are available in the right panel.</p>
             <h3><Film size={15}/> Video Studio</h3>
-            <p>Import more than one video clip. Select clips to trim, split, duplicate, reorder, change speed, volume and clip effects. Add music and timed titles. Export MP4 or WebM at supported resolutions and frame rates. Export capability depends on browser codec support.</p>
+            <p>Import more than one video clip. Select clips to trim, split, duplicate, reorder, change speed, volume and clip effects. Add music and timed titles. Video projects autosave locally in this browser and can be saved, reopened and renamed. Export MP4 or WebM at supported resolutions and frame rates. Export capability depends on browser codec support.</p>
             <h3><ArrowDownToLine size={15}/> Export note</h3>
             <p>4K output can require substantial device memory and processing time. Use direct-to-disk saving where the browser offers it. Unsupported codecs and resolutions are reported instead of silently producing an empty file.</p>
             <button className="primary-button" onClick={() => setHelpOpen(false)}>Got it</button>

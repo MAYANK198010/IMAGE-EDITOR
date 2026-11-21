@@ -3,14 +3,21 @@ import type { StreamTargetChunk } from "mediabunny";
 import {
   AudioLines, ArrowDownToLine, ArrowLeft, ArrowRight, Clapperboard,
   Copy, Film, Music2, Pause, Play, Plus, Scissors, Trash2, Type, Upload,
-  Volume2, Video, X,
+  Volume2, Video, X, Save, FolderOpen, FilePlus2,
 } from "lucide-react";
+import {
+  listSavedProjects, loadVideoProject, saveVideoProject,
+  type ProjectAssetInput, type ProjectTrack, type ProjectTimelineItem,
+  type SavedProjectSummary, type StoredVideoClip, type StoredAudioAsset,
+  type VideoProjectRecord,
+} from "./project-store";
 
 type Props = { onStatus: (message: string) => void; active: boolean };
 type VideoAdjustment = { brightness: number; contrast: number; saturation: number; blur: number; sepia: number; grayscale: number; hue: number };
 type Transition = "cut" | "fade";
 type VideoClip = {
   id: string;
+  assetId: string;
   file: File;
   url: string;
   name: string;
@@ -25,6 +32,7 @@ type VideoClip = {
 };
 type AudioAsset = {
   id: string;
+  assetId: string;
   file: File;
   url: string;
   name: string;
@@ -208,6 +216,15 @@ export default function VideoStudio({ onStatus, active }: Props) {
   const [progress, setProgress] = useState(0);
   const [videoTab, setVideoTab] = useState<"clips" | "audio" | "titles" | "export">("clips");
   const [dragging, setDragging] = useState(false);
+  const [projectId, setProjectId] = useState(() => makeId());
+  const [projectName, setProjectName] = useState("Untitled project");
+  const [projectCreatedAt, setProjectCreatedAt] = useState(() => new Date().toISOString());
+  const [savedProjects, setSavedProjects] = useState<SavedProjectSummary[]>([]);
+  const [selectedSavedProjectId, setSelectedSavedProjectId] = useState("");
+  const [projectReady, setProjectReady] = useState(false);
+  const [isHydratingProject, setIsHydratingProject] = useState(false);
+  const [isSavingProject, setIsSavingProject] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
 
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -304,6 +321,7 @@ export default function VideoStudio({ onStatus, active }: Props) {
         if (metadata <= 0) throw new Error("Video duration is invalid");
         return {
           id: makeId(),
+          assetId: makeId(),
           file,
           url,
           name: file.name,
@@ -351,7 +369,7 @@ export default function VideoStudio({ onStatus, active }: Props) {
         URL.revokeObjectURL(audioAsset.url);
         allocatedUrlsRef.current.delete(audioAsset.url);
       }
-      setAudioAsset({ id: makeId(), file, url, name: file.name, duration, volume: 0.8 });
+      setAudioAsset({ id: makeId(), assetId: makeId(), file, url, name: file.name, duration, volume: 0.8 });
       setVideoTab("audio");
       onStatus("Music track added");
     } catch {
@@ -574,6 +592,227 @@ export default function VideoStudio({ onStatus, active }: Props) {
     }
     context.restore();
   };
+
+
+  const buildProjectRecord = (): VideoProjectRecord => {
+    const videoItems: ProjectTimelineItem[] = clips.map((clip, index) => ({
+      id: clip.id,
+      trackId: "track-video-1",
+      kind: "video",
+      assetId: clip.assetId,
+      start: clipStarts[index] ?? 0,
+      duration: getClipLength(clip),
+      sourceStart: clip.trimStart,
+      sourceEnd: clip.trimEnd,
+      speed: clip.speed,
+      volume: clip.volume,
+      muted: clip.muted,
+      effect: { ...clip.adjustments },
+      keyframes: [],
+    }));
+
+    const audioItems: ProjectTimelineItem[] = audioAsset ? [{
+      id: audioAsset.id,
+      trackId: "track-audio-1",
+      kind: "audio",
+      assetId: audioAsset.assetId,
+      start: 0,
+      duration: audioAsset.duration,
+      volume: audioAsset.volume,
+      keyframes: [],
+    }] : [];
+
+    const textItems: ProjectTimelineItem[] = title.text.trim() ? [{
+      id: "title-main",
+      trackId: "track-text-1",
+      kind: "text",
+      start: title.start,
+      duration: Math.max(0.1, title.end - title.start),
+      style: { text: title.text, color: title.color, size: title.size, position: title.position },
+      keyframes: [],
+    }] : [];
+
+    const tracks: ProjectTrack[] = [
+      { id: "track-video-1", name: "Video 1", kind: "video", order: 0, visible: true, muted: false, locked: false, items: videoItems },
+      { id: "track-text-1", name: "Text 1", kind: "text", order: 1, visible: true, muted: false, locked: false, items: textItems },
+      { id: "track-audio-1", name: "Audio 1", kind: "audio", order: 2, visible: true, muted: false, locked: false, items: audioItems },
+    ];
+
+    const storedClips: StoredVideoClip[] = clips.map((clip) => ({
+      id: clip.id,
+      assetId: clip.assetId,
+      name: clip.name,
+      duration: clip.duration,
+      trimStart: clip.trimStart,
+      trimEnd: clip.trimEnd,
+      speed: clip.speed,
+      volume: clip.volume,
+      muted: clip.muted,
+      transition: clip.transition,
+      adjustments: { ...clip.adjustments },
+    }));
+
+    const storedAudio: StoredAudioAsset | null = audioAsset ? {
+      id: audioAsset.id,
+      assetId: audioAsset.assetId,
+      name: audioAsset.name,
+      duration: audioAsset.duration,
+      volume: audioAsset.volume,
+    } : null;
+
+    return {
+      id: projectId,
+      name: projectName.trim() || "Untitled project",
+      version: 1,
+      createdAt: projectCreatedAt,
+      updatedAt: new Date().toISOString(),
+      video: {
+        clips: storedClips,
+        audioAsset: storedAudio,
+        title: { ...title },
+        exportSettings: { format: exportFormat, resolution, aspect, fps, frameStyle },
+      },
+      timeline: { tracks, items: [...videoItems, ...textItems, ...audioItems], transitions: [] },
+    };
+  };
+
+  const persistCurrentProject = async (manual: boolean) => {
+    if (isSavingProject) return;
+    setIsSavingProject(true);
+    try {
+      const project = buildProjectRecord();
+      const assetMap = new Map<string, File>();
+      clips.forEach((clip) => assetMap.set(clip.assetId, clip.file));
+      if (audioAsset) assetMap.set(audioAsset.assetId, audioAsset.file);
+      const assets: ProjectAssetInput[] = Array.from(assetMap.entries()).map(([id, file]) => ({
+        id, file, name: file.name, type: file.type, lastModified: file.lastModified,
+      }));
+      await saveVideoProject(project, assets);
+      setLastSavedAt(project.updatedAt);
+      setSelectedSavedProjectId(project.id);
+      setSavedProjects(await listSavedProjects());
+      if (manual) onStatus(`Project saved · ${project.name}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown local storage error";
+      if (manual) onStatus(`Could not save project: ${message}`);
+      else onStatus(`Autosave paused: ${message}`);
+    } finally {
+      setIsSavingProject(false);
+    }
+  };
+
+  const openSelectedProject = async () => {
+    if (!selectedSavedProjectId) {
+      onStatus("Choose a saved project first.");
+      return;
+    }
+    try {
+      const loaded = await loadVideoProject(selectedSavedProjectId);
+      if (!loaded) {
+        onStatus("That saved project could not be found.");
+        return;
+      }
+
+      videoRef.current?.pause();
+      audioRef.current?.pause();
+      setIsPlaying(false);
+      allocatedUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      allocatedUrlsRef.current.clear();
+
+      const files = new Map(loaded.assets.map((asset) => [
+        asset.id,
+        new File([asset.file], asset.name, { type: asset.type, lastModified: asset.lastModified }),
+      ]));
+      const urls = new Map<string, string>();
+      const getAssetUrl = (assetId: string) => {
+        const existing = urls.get(assetId);
+        if (existing) return existing;
+        const file = files.get(assetId);
+        if (!file) return "";
+        const url = URL.createObjectURL(file);
+        urls.set(assetId, url);
+        allocatedUrlsRef.current.add(url);
+        return url;
+      };
+
+      const restoredClips = loaded.project.video.clips.flatMap((clip) => {
+        const file = files.get(clip.assetId);
+        const url = getAssetUrl(clip.assetId);
+        return file && url ? [{ ...clip, file, url }] : [];
+      });
+      const storedAudio = loaded.project.video.audioAsset;
+      const restoredAudio = storedAudio
+        ? (() => {
+            const file = files.get(storedAudio.assetId);
+            const url = getAssetUrl(storedAudio.assetId);
+            return file && url ? { ...storedAudio, file, url } : null;
+          })()
+        : null;
+
+      setIsHydratingProject(true);
+      setClips(restoredClips);
+      setAudioAsset(restoredAudio);
+      setTitle({ ...loaded.project.video.title });
+      setExportFormat(loaded.project.video.exportSettings.format);
+      setResolution(loaded.project.video.exportSettings.resolution);
+      setAspect(loaded.project.video.exportSettings.aspect);
+      setFps(loaded.project.video.exportSettings.fps);
+      setFrameStyle(loaded.project.video.exportSettings.frameStyle);
+      setProjectId(loaded.project.id);
+      setProjectName(loaded.project.name);
+      setProjectCreatedAt(loaded.project.createdAt);
+      setActiveClipId(restoredClips[0]?.id ?? null);
+      setLocalTime(restoredClips[0]?.trimStart ?? 0);
+      setLastSavedAt(loaded.project.updatedAt);
+      setVideoTab("clips");
+      setIsHydratingProject(false);
+      onStatus(`Opened project · ${loaded.project.name}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown project loading error";
+      onStatus(`Could not open project: ${message}`);
+    }
+  };
+
+  const createNewProject = () => {
+    if ((clips.length || audioAsset || title.text.trim()) && !window.confirm("Start a new project? Save the current project first if you need to keep it.")) {
+      return;
+    }
+    videoRef.current?.pause();
+    audioRef.current?.pause();
+    allocatedUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    allocatedUrlsRef.current.clear();
+    setClips([]);
+    setAudioAsset(null);
+    setTitle(EMPTY_TITLE);
+    setActiveClipId(null);
+    setLocalTime(0);
+    setIsPlaying(false);
+    setProjectId(makeId());
+    setProjectName("Untitled project");
+    setProjectCreatedAt(new Date().toISOString());
+    setSelectedSavedProjectId("");
+    setLastSavedAt(null);
+    setVideoTab("clips");
+    onStatus("New video project created");
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    void listSavedProjects()
+      .then((projects) => { if (!cancelled) setSavedProjects(projects); })
+      .catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : "Local project storage is unavailable.";
+        if (!cancelled) onStatus(message);
+      })
+      .finally(() => { if (!cancelled) setProjectReady(true); });
+    return () => { cancelled = true; };
+  }, [onStatus]);
+
+  useEffect(() => {
+    if (!projectReady || isHydratingProject) return;
+    const timer = window.setTimeout(() => { void persistCurrentProject(false); }, 1100);
+    return () => window.clearTimeout(timer);
+  }, [projectReady, isHydratingProject, projectId, projectName, projectCreatedAt, clips, audioAsset, title, exportFormat, resolution, aspect, fps, frameStyle]);
 
   const renderExport = async () => {
     if (!clips.length || exporting || outputInFlight.current) return;
@@ -875,8 +1114,23 @@ export default function VideoStudio({ onStatus, active }: Props) {
         </div>
 
         <div className="video-timeline-panel">
+          <div className="video-project-bar">
+            <label className="video-project-name">PROJECT
+              <input value={projectName} onChange={(event) => setProjectName(event.target.value)} aria-label="Project name" maxLength={80}/>
+              <small>{isSavingProject ? "Saving…" : lastSavedAt ? `Saved ${new Date(lastSavedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Local project"}</small>
+            </label>
+            <div className="video-project-actions">
+              <button onClick={() => void persistCurrentProject(true)} disabled={isSavingProject} title="Save project"><Save size={13}/> Save</button>
+              <select aria-label="Saved projects" value={selectedSavedProjectId} onChange={(event) => setSelectedSavedProjectId(event.target.value)}>
+                <option value="">Open saved project…</option>
+                {savedProjects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}
+              </select>
+              <button onClick={() => void openSelectedProject()} disabled={!selectedSavedProjectId}><FolderOpen size={13}/> Open</button>
+              <button onClick={createNewProject}><FilePlus2 size={13}/> New</button>
+            </div>
+          </div>
           <div className="video-timeline-heading">
-            <div><strong>EDIT TIMELINE</strong><small>Sequence clips, overlay title and add music</small></div>
+            <div><strong>EDIT TIMELINE</strong><small>Changes autosave locally · Save a named copy before switching projects</small></div>
             <div className="timeline-add-actions">
               <button onClick={() => videoInputRef.current?.click()}><Plus size={14}/> Video</button>
               <button onClick={() => audioInputRef.current?.click()}><Plus size={14}/> Audio</button>
